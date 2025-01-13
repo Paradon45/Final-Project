@@ -1,0 +1,56 @@
+{
+    "home" : "Home",
+    "homeadmin" : "Home",
+    "attractions" : "Attractions",
+    "attractionadmin" : "Attractions",
+    "cafepage" : "Cafes & Restaurant",
+    "cafepageadmin" : "Cafes & Restaurant",
+    "staypage" : "Hotels",
+    "staypageadmin" : "Hotels",
+    "recommend" : "Recommendation",
+    "recommendadmin" : "Recommendation",
+    "plans" : "Plans",
+    "planadmin" : "Plans",
+    "contact" : "Contact",
+    "contactadmin" : "Contact",
+    "login" : "Login",
+    "register" : "Register",
+    "logout" : "Logout",
+    
+
+    "email" : "Email",
+    "ph_email" : "Please enter your email",
+    "password" : "Password",
+    "ph_password" : "Please enter your password",
+    "firstName" : "Firstname",
+    "ph_firstName" : "Please enter your firstname",
+    "lastName" : "Lastname",
+    "ph_lastName" : "Please enter your lastname",
+    "phone" : "Phone",
+    "ph_phone" : "Please enter your phone number",
+    "confirmPassword": "Confirm Password",
+    "ph_confirmPassword": "Please enter your password again",
+    "pass_mismatch": "Password do not match",
+    "pass_length": "Password must not be less than 8 characters",
+    "register_success": "Register Success",
+    "register_failed": "Registration failed. Please try again.",
+    "login_success": "Login Success",
+    "login_failed": "Incorrect email or password. Please try again.",
+
+    "email_error": "Email is already exist. Please try again.",
+    "unknown_error": "An unknown error occurred. Please try again.",
+
+    "if1" : "If you aren't a member ?",
+    "if2" : "You are already a member ?",
+
+    "headers" : "Phra Mahathat Kaen Nakhon",
+    "des" : "Located inside Wat Nong Waeng, on the banks of Bueng Kaen Nakhon, Phra Mahathat Kaen Nakhon is a reinforced concrete building made of brick and mortar with a chedi-shaped roof, modeled after Phra That Kham Kaen.",
+    "ph_seach" : "Find tourist attractions in Khon Kaen Province",
+    "seach" : "Seach",
+
+    "khonkaen" : "In Khonkaen",
+    "nature" : "Nature"
+
+    
+  }
+  
