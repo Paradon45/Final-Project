@@ -11,11 +11,13 @@
     "recommendadmin" : "Recommendation",
     "plans" : "Plans",
     "planadmin" : "Plans",
-    "contact" : "Contact",
     "contactadmin" : "Contact",
     "login" : "Login",
     "register" : "Register",
     "logout" : "Logout",
+    "edit" : "ADMIN Menu",
+    "see_more" : "See more",
+    "back" : "Back",
     
 
     "email" : "Email",
@@ -39,6 +41,7 @@
 
     "email_error": "Email is already exist. Please try again.",
     "unknown_error": "An unknown error occurred. Please try again.",
+    "error_loading_data": "Error Loading data",
 
     "if1" : "If you aren't a member ?",
     "if2" : "You are already a member ?",

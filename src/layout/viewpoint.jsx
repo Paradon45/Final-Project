@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom"; // Import useParams
-import GoogleMap from "../system/googlemap";
+import { useNavigate, useParams } from "react-router-dom"; // Import useParams
+import { useTranslation } from "react-i18next";
+
 
 const ViewPointPage = () => {
   const { locationId } = useParams(); // Get locationId from the URL
@@ -8,6 +9,8 @@ const ViewPointPage = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchLocationDetails = async () => {
@@ -69,7 +72,18 @@ const ViewPointPage = () => {
       <header className="animate-fadeInDelay1 text-center mb-8 mt-4">
         <h1 className="text-5xl font-bold text-gray-800 mb-4">{name}</h1>
         <div className="w-20 h-1 bg-yellow-500 mx-auto"></div>
+        {/* ปุ่มกลับ */}
+        <div className="text-left mb-4">
+          <button
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded shadow animate-fadeIn"
+          >
+            {t("back")}
+          </button>
+          </div>
       </header>
+
+      
 
       {/* Content Section */}
       <div className="container mx-auto px-6 lg:px-5">

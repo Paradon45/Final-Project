@@ -58,7 +58,7 @@ const Navbar = () => {
         <div className="container mx-auto flex justify-between items-center px-4">
           {/* Left Menu */}
           <ul className="flex gap-8">
-            {["home", "attractions", "cafepage", "staypage", "recommend", "plans", "contact"].map(
+            {["home", "attractions", "cafepage", "staypage", "recommend", "plans"].map(
               (item) => (
                 <li key={item}>
                   <Link

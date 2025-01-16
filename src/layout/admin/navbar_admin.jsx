@@ -86,6 +86,11 @@ const NavbarAdmin = () => {
             </li>
             {userID ? (
               <>
+              <Link to={`/addlocationadmin`} className="text-red-400 hover:text-yellow-300 font-bold transition duration-300"
+              style={{
+                width: "150px",
+                textAlign: "center",
+              }}>{t("edit")}</Link>
                 <li className="animate-fadeIn2 text-yellow-300 font-bold">{firstName}</li>
                 <li className="animate-fadeIn2 text-orange-500 ">(ADMIN)</li>
                 <li>

@@ -1,41 +1,50 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import templeImage from "../../photo/location-2.jpg";
-import waterfallImage from "../../photo/4adc14b0-f135-11eb-be32-97b1a38a3d1b_webp_original.jpg";
+
 
 const AttractionAdmin = () => {
   const { t } = useTranslation();
-
-  const attractions = [
-    {
-      name: "➤ จุดชมวิวหินช้างสี",
-    },
-    {
-      name: "➤ เขื่อนอุบลรัตน์",
-    },
-    {
-      name: "➤ อุทยานแห่งชาติภูเวียง",
-    },
-    {
-      name: "➤ น้ำตกตาดฟ้า",
-    },
-    {
-      name: "➤ เพิ่มเติม",
-    },
-  ];
+  const [groupedAttractions, setGroupedAttractions] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Reset to the top of the page instantly
     window.scrollTo(0, 0);
+
+    const fetchAttractions = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/location/landing");
+        if (!response.ok) {
+          throw new Error("Failed to fetch attractions data.");
+        }
+        const data = await response.json();
+
+        // Group attractions by categoryId
+        const grouped = data.locations.reduce((acc, location) => {
+          acc[location.categoryId] = acc[location.categoryId] || [];
+          acc[location.categoryId].push(location);
+          return acc;
+        }, {});
+        setGroupedAttractions(grouped);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchAttractions();
   }, []);
 
   return (
     <div className="font-kanit">
-      {/* ส่วน Header */}
       <header
-        className="relative h-[400px] w-full bg-cover bg-center "
-        style={{ backgroundImage: `url(${templeImage})` }}
+        className="relative h-[400px] w-full bg-cover bg-center"
+        style={{
+          backgroundImage: `url(${templeImage})`,
+        }}
       >
         <div className="absolute inset-0 bg-black opacity-20"></div>
         <div className="absolute inset-0 flex flex-col items-start justify-center p-12 text-white">
@@ -58,46 +67,66 @@ const AttractionAdmin = () => {
         </div>
       </header>
 
-      {/* ส่วนเนื้อหา */}
       <section className="bg-white py-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center">
-            <img
-              src={waterfallImage}
-              alt="Waterfall"
-              className="w-full h-80 object-cover md:w-1/2 rounded-lg shadow-lg mb-6 md:mb-0"
-            />
-            <div className="md:ml-8">
-              <h2
-                className="animate-fadeIn3 text-5xl text-red-600 font-bold mb-4 relative "
-                style={{ top: "-55px" }}
-              >
-                {t("nature")}
-              </h2>
-              <div
-                className="w-50 h-1 bg-gray-200 mt-4 relative "
-                style={{ top: "-55px" }}
-              ></div>
-              <div>
-                {attractions.map((attractions, index) => (
-                  <ul
-                    key={index}
-                    className={`text-gray-700 text-base space-y-2 relative transform transition-all opacity-0  delay-${
-                      index * 200
-                    } animate-fadeIn3Delay1`}
-                    style={{ top: "-40px", animationDelay: `${index * 0.2}s` }}
-                  >
-                    <Link
-                      to="/viewpointadmin"
-                      className="block hover:text-yellow-500 transition duration-300 mt-2"
-                    >
-                      {attractions.name}
-                    </Link>
-                  </ul>
-                ))}
-              </div>
-            </div>
-          </div>
+          {loading && <p className="text-center">{t("loading")}</p>}
+          {error && (
+            <p className="text-center text-red-500">
+              {t("error_loading_data")}
+            </p>
+          )}
+          {!loading && !error && (
+            <>
+              {Object.entries(groupedAttractions).map(([categoryId, locations]) => (
+                <div key={categoryId} className="mb-12">
+                  <div className="flex flex-col md:flex-row items-center">
+                    {/* Display the first image from the category */}
+                    <img
+                      src={locations[0]?.locationImg[0].url || "https://via.placeholder.com/300"}
+                      alt={locations[0]?.name || "Category Image"}
+                      className="w-full h-80 object-cover md:w-1/2 rounded-lg shadow-lg mb-6 md:mb-0"
+                    />
+                    <div className="md:ml-8">
+                      {/* Display category name */}
+                      <h2 className="text-5xl text-red-600 font-bold mb-4">
+                        {locations[0]?.category.name || t("category")}
+                      </h2>
+                      <div className="w-50 h-1 bg-gray-200 mt-4"></div>
+                      {/* Display locations in the category */}
+                      <div>
+                        {locations.slice(0, 4).map((attraction, index) => (
+                          <ul
+                            key={index}
+                            className={`text-gray-700 text-base space-y-2 relative transform transition-all opacity-0 animate-fadeIn3Delay1`}
+                            style={{
+                              animationDelay: `${index * 0.2}s`,
+                            }}
+                          >
+                            <Link
+                              to={`/viewpointadmin/${attraction.locationId}`}
+                              className="block hover:text-yellow-500 transition duration-300 mt-2 "
+                            >
+                              ➤ {attraction.name}
+                            </Link>
+                          </ul>
+                        ))}
+                        {/* Always show "See More" button */}
+                        <Link
+                          to={`/seemoreadmin/${categoryId}`}
+                          className="block text-gray-700 hover:text-yellow-500 duration-300 pt-2 transform transition-all opacity-0 animate-fadeIn3Delay1"
+                          style={{
+                            animationDelay: `${4 * 0.2}s`,
+                          }}
+                        >
+                          ➤ {t("see_more")}
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       </section>
     </div>

@@ -17,7 +17,7 @@ import ViewPointPage from "./layout/viewpoint";
 import Staypage from "./layout/staypage";
 import CafeDetail from "./layout/cafes";
 import StayDetail from "./layout/stays";
-import ContactUsPage from "./layout/contact";
+import SeeMore from "./layout/seeMore";
 
 import HomeAdmin from "./layout/admin/home_admin";
 import NavbarAdmin from "./layout/admin/navbar_admin";
@@ -28,6 +28,8 @@ import CafeDetailAdmin from "./layout/admin/cafes_admin";
 import CafepageAdmin from "./layout/admin/cafepage_admin";
 import StayDetailAdmin from "./layout/admin/stays_admin";
 import StaypageAdmin from "./layout/admin/staypage_admin";
+import AddLocationPageAdmin from "./layout/admin/addlocation_admin";
+import SeeMoreAdmin from "./layout/admin/seeMore_admin";
 
 
 
@@ -36,7 +38,7 @@ const Layout = ({ children }) => {
 
   // ซ่อน Navbar และ Footer เฉพาะหน้า /
   const hideLayout = location.pathname === "/";
-  const isAdminPage = location.pathname.endsWith("admin");;
+  const isAdminPage = location.pathname.includes("admin");
 
   return (
     <>
@@ -57,19 +59,21 @@ const App = () => {
           <Route path="/" element={<Word />} />
           <Route path="/test" element={<Test />} />
           <Route path="/attractions" element={<Attractions />} />
+          <Route path="/seemore/:categoryId" element={<SeeMore />} />
+          <Route path="/seemoreadmin/:categoryId" element={<SeeMoreAdmin />} />
           <Route path="/viewpoint/:locationId" element={<ViewPointPage />} />
+          <Route path="/viewpointadmin/:locationId" element={<ViewPointPageAdmin />} />
           <Route path="/cafepage" element={<Cafepage />} />
           <Route path="/staypage" element={<Staypage />} />
           <Route path="/cafes" element={<CafeDetail />} />
           <Route path="/stays" element={<StayDetail />} />
-          <Route path="/contact" element={<ContactUsPage />} />
           <Route path="/homeadmin" element={<HomeAdmin />} />
           <Route path="/attractionadmin" element={<AttractionAdmin/>} />
           <Route path="/cafepageadmin" element={<CafepageAdmin />} />
           <Route path="/staypageadmin" element={<StaypageAdmin />} />
-          <Route path="/viewpointadmin" element={<ViewPointPageAdmin />} />
           <Route path="/cafeadmin" element={<CafeDetailAdmin />} />
           <Route path="/stayadmin" element={<StayDetailAdmin />} />
+          <Route path="/addlocationadmin" element={<AddLocationPageAdmin/>} />
         </Routes>
       </Layout>
     </Router>
