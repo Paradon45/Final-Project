@@ -73,8 +73,8 @@ const AddLocationPageAdmin = () => {
         throw new Error(errorMessage);
       }
 
-      setIsSuccess(true);
-      setTimeout(() => navigate(`/homeadmin`), 1500);
+    setIsSuccess(true);
+    navigate(`/homeadmin`);
     } catch (err) {
       setError(err.message || "เกิดข้อผิดพลาด");
     } finally {

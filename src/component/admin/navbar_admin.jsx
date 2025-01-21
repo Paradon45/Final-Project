@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import Login from "./login";
-import Register from "./register";
-import Translations from "../system/translations";
+import Login from "../../layout/login";
+import Register from "../../layout/register";
+import Translations from "../../system/translations";
+import { useNavigate } from "react-router-dom";
 
-const Navbar = () => {
+const NavbarAdmin = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [userID, setUserID] = useState(null);
   const [firstName, setFirstName] = useState(null);
+  const navigate = useNavigate();
 
   const { t } = useTranslation();
 
@@ -41,6 +43,7 @@ const Navbar = () => {
   }, [lastScrollY]);
 
   const handleLogout = () => {
+    navigate("/home");
     localStorage.removeItem("token");
     localStorage.removeItem("userID");
     localStorage.removeItem("firstName");
@@ -51,14 +54,14 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`font-kanit bg-gradient-to-r from-orange-600 to-orange-800 text-white py-4 fixed w-full top-0 left-0 z-50 shadow-lg transition-transform duration-500 ${
+        className={`font-kanit bg-gradient-to-r from-gray-500 to-gray-700 text-white py-4 fixed w-full top-0 left-0 z-50 shadow-lg transition-transform duration-500 ${
           showNavbar ? "translate-y-0" : "-translate-y-full"
         }`}
       >
         <div className="container mx-auto flex justify-between items-center px-4">
           {/* Left Menu */}
           <ul className="flex gap-8">
-            {["home", "attractions", "cafepage", "staypage", "recommend", "plans"].map(
+            {["homeadmin", "attractionadmin", "cafepageadmin", "staypageadmin", "recommendadmin", "planadmin"].map(
               (item) => (
                 <li key={item}>
                   <Link
@@ -83,7 +86,13 @@ const Navbar = () => {
             </li>
             {userID ? (
               <>
+              <Link to={`/addlocationadmin`} className="text-red-400 hover:text-yellow-300 font-bold transition duration-300"
+              style={{
+                width: "150px",
+                textAlign: "center",
+              }}>{t("edit")}</Link>
                 <li className="animate-fadeIn2 text-yellow-300 font-bold">{firstName}</li>
+                <li className="animate-fadeIn2 text-orange-500 ">(ADMIN)</li>
                 <li>
                   <button
                     onClick={handleLogout}
@@ -159,4 +168,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default NavbarAdmin;

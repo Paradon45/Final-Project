@@ -69,9 +69,9 @@ const AttractionAdmin = () => {
 
       <section className="bg-white py-12">
         <div className="container mx-auto px-4">
-          {loading && <p className="text-center">{t("loading")}</p>}
+          {loading && <p className="text-xl font-bold text-center">{t("loading")}</p>}
           {error && (
-            <p className="text-center text-red-500">
+            <p className="text-xl font-bold text-center text-red-500">
               {t("error_loading_data")}
             </p>
           )}

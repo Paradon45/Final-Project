@@ -5,8 +5,8 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import Navbar from "./layout/navbar";
-import Footer from "./layout/footer";
+import Navbar from "./component/navbar";
+import Footer from "./component/footer";
 
 import Word from "./layout/word";
 import Home from "./layout/home";
@@ -20,8 +20,8 @@ import StayDetail from "./layout/stays";
 import SeeMore from "./layout/seeMore";
 
 import HomeAdmin from "./layout/admin/home_admin";
-import NavbarAdmin from "./layout/admin/navbar_admin";
-import FooterAdmin from "./layout/admin/footer_admin";
+import NavbarAdmin from "./component/admin/navbar_admin";
+import FooterAdmin from "./component/admin/footer_admin";
 import AttractionAdmin from "./layout/admin/attractions_admin";
 import ViewPointPageAdmin from "./layout/admin/viewpoint_admin";
 import CafeDetailAdmin from "./layout/admin/cafes_admin";

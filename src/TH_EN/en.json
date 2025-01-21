@@ -42,6 +42,7 @@
     "email_error": "Email is already exist. Please try again.",
     "unknown_error": "An unknown error occurred. Please try again.",
     "error_loading_data": "Error Loading data",
+    "loading": "Loading...",
 
     "if1" : "If you aren't a member ?",
     "if2" : "You are already a member ?",
