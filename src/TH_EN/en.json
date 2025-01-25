@@ -1,6 +1,8 @@
 {
     "home" : "Home",
     "homeadmin" : "Home",
+    "locations" : "All Locations",
+    "locationadmin" : "All Locations",
     "attractions" : "Attractions",
     "attractionadmin" : "Attractions",
     "cafepage" : "Cafes & Restaurant",
@@ -42,6 +44,7 @@
     "email_error": "Email is already exist. Please try again.",
     "unknown_error": "An unknown error occurred. Please try again.",
     "error_loading_data": "Error Loading data",
+    "no_locations_in_category": "No Location in Category",
     "loading": "Loading...",
 
     "if1" : "If you aren't a member ?",
@@ -53,6 +56,10 @@
     "seach" : "Seach",
 
     "khonkaen" : "In Khonkaen",
+    "all_locations" : "All Locations",
+    "temples" : "Temples",
+    "markets" : "Markets",
+    "others" : "Others",
     "nature" : "Nature"
 
     

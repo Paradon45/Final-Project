@@ -30,6 +30,7 @@ import StayDetailAdmin from "./layout/admin/stays_admin";
 import StaypageAdmin from "./layout/admin/staypage_admin";
 import AddLocationPageAdmin from "./layout/admin/addlocation_admin";
 import SeeMoreAdmin from "./layout/admin/seeMore_admin";
+import Landing from "./layout/landing";
 
 
 
@@ -74,6 +75,8 @@ const App = () => {
           <Route path="/cafeadmin" element={<CafeDetailAdmin />} />
           <Route path="/stayadmin" element={<StayDetailAdmin />} />
           <Route path="/addlocationadmin" element={<AddLocationPageAdmin/>} />
+          <Route path="/landing/:categoryId" element={<Landing/>} />
+          <Route path="/landing" element={<Landing/>} />
         </Routes>
       </Layout>
     </Router>

@@ -163,6 +163,8 @@ const AddLocationPageAdmin = () => {
             <option value="2">วัด/โบราณสถาน</option>
             <option value="3">ตลาด</option>
             <option value="4">อื่นๆ</option>
+            <option value="5">คาเฟ่และร้านอาหาร</option>
+            <option value="6">ที่พัก</option>
           </select>
         </div>
 

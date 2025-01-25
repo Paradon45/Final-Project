@@ -76,7 +76,7 @@ const ViewPointPage = () => {
         <div className="text-left mb-4">
           <button
             onClick={() => navigate(-1)}
-            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded shadow animate-fadeIn"
+            className="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow transition duration-200"
           >
             {t("back")}
           </button>
