@@ -19,8 +19,8 @@ module.exports = {
           '100%': { opacity: '1'},
         },
         fadeOut: {
-          '0%': { opacity: '1'},
           '100%': { opacity: '0'},
+          '0%': { opacity: '1'},
         },
         scaleUp: {
           '0%': { transform: 'scale(0.95)', opacity: '0' },
@@ -44,7 +44,7 @@ module.exports = {
         fadeIn2Delay2: 'fadeIn 1s ease-in-out',
         fadeIn3: 'fadeInLeft 0.6s ease-in-out',
         fadeIn3Delay1: 'fadeInLeft 0.8s ease-in-out forwards',
-        fadeOut: 'fadeOut 0.3s ease-in-out',
+        fadeOut: 'fadeOut 3.0s ease-in-out',
         'spin-slow': 'spin 60s linear infinite',
         scaleUp: 'scaleUp 0.3s ease-in-out',
         shake: "shake 0.5s ease-in-out",

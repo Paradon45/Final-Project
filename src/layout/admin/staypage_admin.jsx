@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import image1 from "../../photo/avani-khon-kaen-hotel.jpg";
+import image1 from "../../photo/1avani-khon-kaen-hotel.jpg";
 import image2 from "../../photo/96483612.jpg";
 import image3 from "../../photo/Inpawa-Hotel-Ban-Phai-Exterior.jpg";
 import { FaHotel } from "react-icons/fa";

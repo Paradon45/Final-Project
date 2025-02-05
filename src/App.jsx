@@ -68,7 +68,7 @@ const App = () => {
           <Route path="/cafepage" element={<Cafepage />} />
           <Route path="/staypage" element={<Staypage />} />
           <Route path="/cafes/:locationId" element={<CafeDetail />} />
-          <Route path="/stays" element={<StayDetail />} />
+          <Route path="/stays/:locationId" element={<StayDetail />} />
           <Route path="/homeadmin" element={<HomeAdmin />} />
           <Route path="/attractionadmin" element={<AttractionAdmin/>} />
           <Route path="/cafepageadmin" element={<CafepageAdmin />} />

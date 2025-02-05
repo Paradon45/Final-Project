@@ -6,8 +6,8 @@ import {
   FaStar,
   FaTimes,
 } from "react-icons/fa";
-import image1 from "../../photo/hotel-building.jpg";
-import image2 from "../../photo/avani-khon-kaen-hotel.jpg";
+import image1 from "../../photo/2hotel-building.jpg";
+import image2 from "../../photo/1avani-khon-kaen-hotel.jpg";
 import image3 from "../../photo/539799461.jpg";
 
 const StayDetailAdmin = () => {

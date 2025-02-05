@@ -87,6 +87,11 @@
     "ph_phone2" : "Please enter the phone number of the location.",
     "open-close" : "Opening - closing days and times",
     "ph_open-close" : "Please fill in the opening and closing times of the location such as Monday-Friday time 08.00-17-00, open every day, open all the time, etc.",
-    "photo" : "Upload photos (up to 10 photos)"
+    "photo" : "Upload photos (up to 10 photos)",
+    "more_images" : "More Images",
+
+    "no_locations" : "The location you were looking for was not found.",
+    "alert" : "Notifications",
+    "close" : "Close"
   }
   

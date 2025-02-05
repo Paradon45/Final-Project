@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { useToast } from "../../component/ToastComponent";
 
 const AddLocationPageAdmin = () => {
   const navigate = useNavigate();
+  const { ToastComponent, showToast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -75,11 +77,13 @@ const AddLocationPageAdmin = () => {
             ? "เกิดข้อผิดพลาดในระบบ"
             : "เพิ่มสถานที่ไม่สำเร็จ";
         setError(errorMessage);
+        showToast("เพิ่มสถานที่ไม่สำเร็จ");
         throw new Error(errorMessage);
       }
 
       setIsSuccess(true);
       navigate(`/homeadmin`);
+      
     } catch (err) {
       setError(err.message || "เกิดข้อผิดพลาด");
     } finally {
@@ -89,6 +93,7 @@ const AddLocationPageAdmin = () => {
 
   return (
     <div className="animate-fadeIn2 font-kanit bg-gradient-to-b from-gray-200 to-gray-100 container mx-auto p-8 mt-12 md:p-16">
+      {ToastComponent}
       {isLoading && (
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded shadow-lg text-center">
