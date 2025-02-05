@@ -86,7 +86,7 @@ const NavbarAdmin = () => {
             </li>
             {userID ? (
               <>
-              <Link to={`/addlocationadmin`} className="text-red-400 hover:text-yellow-300 font-bold transition duration-300"
+              <Link to={`/addlocationadmin`} className="text-orange-600 hover:text-yellow-300 font-bold transition duration-300"
               style={{
                 width: "150px",
                 textAlign: "center",

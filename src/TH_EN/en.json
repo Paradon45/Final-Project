@@ -20,6 +20,7 @@
     "edit" : "ADMIN Menu",
     "see_more" : "See more",
     "back" : "Back",
+    "goto_up/del" : "Go to Update/Delete location",
     
 
     "email" : "Email",
@@ -60,8 +61,32 @@
     "temples" : "Temples",
     "markets" : "Markets",
     "others" : "Others",
-    "nature" : "Nature"
+    "nature" : "Nature",
 
-    
+    "delete" : "Delete",
+    "deleting" : "Deleting",
+    "delete_success" : "Delete Success",
+    "delete_failed" : "Delete Failed",
+    "confirm_delete" : "Confirm Delete?",
+    "confirm" : "Confirm",
+    "edit_location" : "Edit",
+    "cancel" : "Cancel",
+    "update" : "Update",
+
+    "addpage" : "Add Attractions",
+    "name" : "Name",
+    "ph_name" : "Please enter the name of the place such as Wat Kao Chan, Hin Chang Si Viewpoint, etc.",
+    "description" : "Description",
+    "ph_description" : "Please fill in the details of the location.",
+    "category" : "Category",
+    "ph_category" : "Select location type",
+    "googlemap" : "Link Google Map",
+    "ph_googlemap" : "Please enter the map embed link from Google Map of each location.",
+    "location" : "Location",
+    "ph_location" : "Please enter the address of the location.",
+    "ph_phone2" : "Please enter the phone number of the location.",
+    "open-close" : "Opening - closing days and times",
+    "ph_open-close" : "Please fill in the opening and closing times of the location such as Monday-Friday time 08.00-17-00, open every day, open all the time, etc.",
+    "photo" : "Upload photos (up to 10 photos)"
   }
   

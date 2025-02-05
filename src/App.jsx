@@ -30,6 +30,7 @@ import StayDetailAdmin from "./layout/admin/stays_admin";
 import StaypageAdmin from "./layout/admin/staypage_admin";
 import AddLocationPageAdmin from "./layout/admin/addlocation_admin";
 import SeeMoreAdmin from "./layout/admin/seeMore_admin";
+import LandingAdmin from "./layout/admin/landing_admin";
 import Landing from "./layout/landing";
 
 
@@ -66,7 +67,7 @@ const App = () => {
           <Route path="/viewpointadmin/:locationId" element={<ViewPointPageAdmin />} />
           <Route path="/cafepage" element={<Cafepage />} />
           <Route path="/staypage" element={<Staypage />} />
-          <Route path="/cafes" element={<CafeDetail />} />
+          <Route path="/cafes/:locationId" element={<CafeDetail />} />
           <Route path="/stays" element={<StayDetail />} />
           <Route path="/homeadmin" element={<HomeAdmin />} />
           <Route path="/attractionadmin" element={<AttractionAdmin/>} />
@@ -77,6 +78,8 @@ const App = () => {
           <Route path="/addlocationadmin" element={<AddLocationPageAdmin/>} />
           <Route path="/landing/:categoryId" element={<Landing/>} />
           <Route path="/landing" element={<Landing/>} />
+          <Route path="/landingadmin" element={<LandingAdmin/>} />
+          <Route path="/landingadmin/:categoryId" element={<LandingAdmin/>} />
         </Routes>
       </Layout>
     </Router>

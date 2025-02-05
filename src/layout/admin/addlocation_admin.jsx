@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaPlus } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 const AddLocationPageAdmin = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const AddLocationPageAdmin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const { t } = useTranslation();
 
   useEffect(() => {
     return () => {
@@ -27,7 +29,10 @@ const AddLocationPageAdmin = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: name === "categoryId" ? Number(value) : value, }));
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: name === "categoryId" ? Number(value) : value,
+    }));
   };
 
   const hdlImageChange = (e) => {
@@ -73,8 +78,8 @@ const AddLocationPageAdmin = () => {
         throw new Error(errorMessage);
       }
 
-    setIsSuccess(true);
-    navigate(`/homeadmin`);
+      setIsSuccess(true);
+      navigate(`/homeadmin`);
     } catch (err) {
       setError(err.message || "เกิดข้อผิดพลาด");
     } finally {
@@ -105,7 +110,7 @@ const AddLocationPageAdmin = () => {
             ) : (
               <div>
                 <h1 className="text-2xl font-bold mb-4 text-center">
-                  กำลังโหลด...
+                  {t("loading")}
                 </h1>
                 <div className="loader w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
               </div>
@@ -114,19 +119,29 @@ const AddLocationPageAdmin = () => {
         </div>
       )}
 
-      <h1 className="text-4xl font-bold text-gray-800 mb-4 mt-5 flex justify-center items-center">เพิ่มสถานที่
-        <FaPlus className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
+      <h1 className="text-4xl font-bold text-gray-800 mb-4 mt-5 flex justify-center items-center">
+        {t("addpage")}
+        <FaPlus className="text-orange-500 text-3xl ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
       </h1>
       <div className="w-20 h-1 bg-orange-500 mx-auto mb-4"></div>
-      {error && <div className="text-red-500 mb-4">{error}</div>}
+      <Link to={`/landingadmin`}>
+        <div className="text-right mt-4">
+          <button className="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow transition duration-200">
+            {t("goto_up/del")}
+          </button>
+        </div>
+      </Link>
+      {error && (
+        <div className="font-semibold text-xl text-red-500 mb-4">{error}</div>
+      )}
       <form onSubmit={handleSubmit}>
         {/* Name */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">ชื่อสถานที่</label>
+          <label className="block text-gray-700 mb-2">{t("name")}</label>
           <input
             type="text"
             name="name"
-            placeholder="กรุณากรอกชื่อสถานที่เช่น วัดเก้าชั้น, จุดชมวิวหินช้างสี เป็นต้น"
+            placeholder={t("ph_name")}
             value={formData.name}
             onChange={handleChange}
             className="w-full border px-4 py-2"
@@ -136,10 +151,10 @@ const AddLocationPageAdmin = () => {
 
         {/* Description */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">รายละเอียดสถานที่</label>
+          <label className="block text-gray-700 mb-2">{t("description")}</label>
           <textarea
             name="description"
-            placeholder="กรุณากรอกรายละเอียดของสถานที่"
+            placeholder={t("ph_description")}
             value={formData.description}
             onChange={handleChange}
             className="w-full border px-4 py-2"
@@ -150,7 +165,7 @@ const AddLocationPageAdmin = () => {
 
         {/* Category */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">ประเภทสถานที่</label>
+          <label className="block text-gray-700 mb-2">{t("category")}</label>
           <select
             name="categoryId"
             value={formData.categoryId}
@@ -158,23 +173,23 @@ const AddLocationPageAdmin = () => {
             className="w-full border px-4 py-2"
             required
           >
-            <option value="">เลือกประเภทสถานที่</option>
-            <option value="1">ธรรมชาติ</option>
-            <option value="2">วัด/โบราณสถาน</option>
-            <option value="3">ตลาด</option>
-            <option value="4">อื่นๆ</option>
-            <option value="5">คาเฟ่และร้านอาหาร</option>
-            <option value="6">ที่พัก</option>
+            <option value="">{t("ph_category")}</option>
+            <option value="1">{t("nature")}</option>
+            <option value="2">{t("temples")}</option>
+            <option value="3">{t("markets")}</option>
+            <option value="5">{t("cafepage")}</option>
+            <option value="6">{t("staypage")}</option>
+            <option value="4">{t("others")}</option>
           </select>
         </div>
 
         {/* Map */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">ลิงก์ Google Map</label>
+          <label className="block text-gray-700 mb-2">{t("googlemap")}</label>
           <input
             type="text"
             name="map"
-            placeholder="กรุณากรอกลิงก์ฝังแผนที่จาก Google Map ของแต่ละสถานที่"
+            placeholder={t("ph_googlemap")}
             value={formData.map}
             onChange={handleChange}
             className="w-full border px-4 py-2"
@@ -184,11 +199,11 @@ const AddLocationPageAdmin = () => {
 
         {/* Address */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">ที่อยู่</label>
+          <label className="block text-gray-700 mb-2">{t("location")}</label>
           <input
             type="text"
             name="address"
-            placeholder="กรุณากรอกที่อยู่ของสถานที่"
+            placeholder={t("ph_location")}
             value={formData.address}
             onChange={handleChange}
             className="w-full border px-4 py-2"
@@ -198,11 +213,11 @@ const AddLocationPageAdmin = () => {
 
         {/* Phone */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">เบอร์โทร</label>
+          <label className="block text-gray-700 mb-2">{t("phone")}</label>
           <input
             type="text"
             name="phone"
-            placeholder="กรุณากรอกเบอร์โทรของสถานที่"
+            placeholder={t("ph_phone")}
             value={formData.phone}
             onChange={handleChange}
             className="w-full border px-4 py-2"
@@ -212,11 +227,11 @@ const AddLocationPageAdmin = () => {
 
         {/* Date */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">วันเวลาเปิด-ปิด</label>
+          <label className="block text-gray-700 mb-2">{t("open-close")}</label>
           <input
             type="text"
             name="date"
-            placeholder="กรุณากรอกเวลาเปิด-ปิดของสถานที่เช่น 08.00-17-00, เปิดตลอดเวลา เป็นต้น"
+            placeholder={t("ph_open-close")}
             value={formData.date}
             onChange={handleChange}
             className="w-full border px-4 py-2"
@@ -226,9 +241,7 @@ const AddLocationPageAdmin = () => {
 
         {/* Images */}
         <div className="mb-4">
-          <label className="block text-gray-700 mb-2">
-            อัปโหลดรูปภาพ .JPEG (สูงสุด 10 รูป)
-          </label>
+          <label className="block text-gray-700 mb-2">{t("photo")}</label>
           <input
             type="file"
             multiple
@@ -257,7 +270,7 @@ const AddLocationPageAdmin = () => {
           }`}
           disabled={isLoading}
         >
-          {isLoading ? "กำลังเพิ่ม..." : "เพิ่มสถานที่"}
+          {isLoading ? t("loading") : t("addpage")}
         </button>
       </form>
     </div>

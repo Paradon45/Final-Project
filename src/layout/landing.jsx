@@ -146,7 +146,7 @@ const Landing = () => {
                           <div className="text-xl font-bold text-red-600">
                             {location.name}
                           </div>
-                          <p className="text-gray-600 mt-2 line-clamp-2">
+                          <p className="text-gray-600 mt-2 mr-2 line-clamp-2">
                             {location.description}
                           </p>
                           <div className="flex items-center mt-2">

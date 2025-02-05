@@ -1,51 +1,40 @@
-import React, { useEffect } from "react";
-import image1 from "../photo/140b324156cf4c7480b0cf07bd1d0941.png";
-import image2 from "../photo/44d545dffba34bf48a2eb26c826670ae.png";
-import image3 from "../photo/images.png";
+import React, { useEffect, useState } from "react";
 import { FaCoffee } from "react-icons/fa";
 import { GiForkKnifeSpoon } from "react-icons/gi";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
 const Cafepage = () => {
-
   const { t } = useTranslation();
+  const [cafes, setCafes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Reset to the top of the page instantly
     window.scrollTo(0, 0);
+    
+    const fetchCafes = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/location/landing");
+        if (!response.ok) {
+          throw new Error("Failed to fetch cafes data.");
+        }
+        const data = await response.json();
+        
+        const filteredCafes = data.locations.filter(location => location.categoryId === 5);
+        setCafes(filteredCafes);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCafes();
   }, []);
-
-  const cafes = [
-    {
-      image: image1,
-      alt: "Double you Cafe",
-      title: "Double you Cafe",
-      type: "คาเฟ่",
-      rating: "★★★★★",
-      description: "บรรยากาศร้านสงบ ร่มรื่น ดีต่อใจอะ",
-    },
-    {
-      image: image2,
-      alt: "Dofarm Cafe",
-      title: "Dofarm Cafe",
-      type: "ร้านอาหาร",
-      rating: "★★★★☆",
-      description: "บรรยากาศท้องถิ่นใกล้ชิดธรรมชาติ",
-    },
-    {
-      image: image3,
-      alt: "Pi Coffee",
-      title: "Pi Coffee",
-      type: "คาเฟ่ & ร้านอาหาร",
-      rating: "★★★★★",
-      description: "กาแฟหอมละมุน สไตล์โมเดิร์นอบอุ่น",
-    },
-  ];
 
   return (
     <div className="font-kanit bg-gradient-to-b from-gray-200 to-white animate-fadeIn max-w-7xl mx-auto p-8 md:p-16">
-      {/* Title Section */}
       <div className="text-center mb-10">
         <h2 className="text-4xl font-bold text-gray-800 mb-4 mt-5 flex justify-center items-center">
           {t("cafepage")}
@@ -54,47 +43,46 @@ const Cafepage = () => {
         <div className="w-20 h-1 bg-orange-500 mx-auto"></div>
       </div>
 
-      {/* Cafe Cards Grid */}
-      <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-8">
-        {cafes.map((cafe, index) => (
-          <div
-            key={index}
-            className={`relative bg-white border rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-2xl opacity-0 translate-y-10 delay-${
-              index * 200
-            } animate-fadeIn`}
-            style={{ animationDelay: `${index * 0.2}s` }}
-          >
-            {/* Image Section */}
-            <div className="relative group">
-              <img
-                src={cafe.image}
-                alt={cafe.alt}
-                className="w-full h-48 object-cover"
-              />
-              <Link to="/cafes" className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center text-white text-lg font-medium">
-                ดูเพิ่มเติม
-              </Link>
-            </div>
-
-            {/* Info Section */}
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-3">
-                <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                  {cafe.type}
-                </span>
-                <GiForkKnifeSpoon className="text-gray-500 text-2xl" />
+      {loading && <p className="text-xl font-bold text-center">{t("loading")}</p>}
+      {error && <p className="text-xl font-bold text-center text-red-500">{t("error_loading_data")}</p>}
+      
+      {!loading && !error && (
+        <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-8">
+          {cafes.map((cafe, index) => (
+            <div
+              key={cafe.locationId}
+              className={`relative bg-white border rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-2xl opacity-0 translate-y-10 delay-${index * 200} animate-fadeIn`}
+              style={{ animationDelay: `${index * 0.2}s` }}
+            >
+              <div className="relative group">
+                <img
+                  src={cafe.locationImg[0]?.url || "https://via.placeholder.com/300"}
+                  alt={cafe.name}
+                  className="w-full h-48 object-cover"
+                />
+                <Link to={`/cafes/${cafe.locationId}`} className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center text-white text-lg font-medium">
+                  {t("see_more")}
+                </Link>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mt-2">
-                {cafe.title}
-              </h3>
-              <span className="text-yellow-500 text-2xl">{cafe.rating}</span>
-              <p className="text-gray-600 mt-3 text-sm leading-relaxed">
-                {cafe.description}
-              </p>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                    {t("cafe")}
+                  </span>
+                  <GiForkKnifeSpoon className="text-gray-500 text-2xl" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-800 mt-2">
+                  {cafe.name}
+                </h3>
+                <span className="text-yellow-500 text-2xl">★★★★★</span>
+                <p className="text-gray-600 mt-3 text-sm leading-relaxed">
+                {cafe.description.length > 100 ? `${cafe.description.substring(0, 100)}...` : cafe.description}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
