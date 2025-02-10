@@ -82,7 +82,7 @@ const AddLocationPageAdmin = () => {
       }
 
       setIsSuccess(true);
-      navigate(`/homeadmin`);
+      navigate(`/landingadmin`);
       
     } catch (err) {
       setError(err.message || "เกิดข้อผิดพลาด");
@@ -131,7 +131,7 @@ const AddLocationPageAdmin = () => {
       <div className="w-20 h-1 bg-orange-500 mx-auto mb-4"></div>
       <Link to={`/landingadmin`}>
         <div className="text-right mt-4">
-          <button className="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow transition duration-200">
+          <button className="px-6 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold rounded-lg shadow transition duration-200">
             {t("goto_up/del")}
           </button>
         </div>

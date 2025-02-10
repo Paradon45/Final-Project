@@ -21,6 +21,8 @@
     "see_more" : "See more",
     "back" : "Back",
     "goto_up/del" : "Go to Update/Delete location",
+    "goto_add" : "Go to Add Attractions",
+    "map" : "MAP",
     
 
     "email" : "Email",
@@ -91,6 +93,10 @@
     "more_images" : "More Images",
 
     "no_locations" : "The location you were looking for was not found.",
+    "travel_history" : "Travel History",
+    "date" : "yy-mm-dd",
+    "cost" : "Cost",
+    "spending_chart" : "Spending Chart",
     "alert" : "Notifications",
     "close" : "Close"
   }

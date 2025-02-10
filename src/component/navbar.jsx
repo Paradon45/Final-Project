@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import Login from "../layout/login";
 import Register from "../layout/register";
 import Translations from "../system/translations";
+import { FaArrowRightToBracket } from "react-icons/fa6";
 
 const Navbar = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -83,17 +84,21 @@ const Navbar = () => {
             </li>
             {userID ? (
               <>
-                <li className="animate-fadeIn2 text-yellow-300 font-bold">{firstName}</li>
+              <Link to={"/profile"}>
+                <li className="animate-fadeIn2 text-yellow-400 font-bold hover:text-yellow-300 transition duration-200 ease-in-out">{firstName}</li>
+                </Link>
                 <li>
                   <button
                     onClick={handleLogout}
-                    className="animate-fadeIn2 hover:text-yellow-300 transition duration-300 px-3 py-1 border border-yellow-400 rounded-full"
+                    className="animate-fadeIn2 hover:text-yellow-300 transition duration-300 px-3 py-1 border border-yellow-400 rounded-full flex items-center justify-center gap-2"
                     style={{
-                      width: "120px",
+                      width: "140px",
                       textAlign: "center",
                     }}
                   >
+                   <FaArrowRightToBracket />
                     {t("logout")}
+                    
                   </button>
                 </li>
               </>

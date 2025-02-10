@@ -67,7 +67,7 @@ const Cafepage = () => {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-3">
                   <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                    {t("cafe")}
+                    {t("cafepage")}
                   </span>
                   <GiForkKnifeSpoon className="text-gray-500 text-2xl" />
                 </div>

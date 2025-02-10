@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { FaEye } from "react-icons/fa";
+
 
 const SeeMore = () => {
   const { categoryId } = useParams();
@@ -42,10 +44,14 @@ const SeeMore = () => {
       {/* Header */}
       <header className="text-center mb-4 py-6">
         <div className="container mx-auto px-4">
-          <h1 className="text-5xl font-bold text-gray-800 mb-4 flex justify-center items-center">
-            {locations[0]?.category?.name || t("loading")}
+          <h1 className="text-5xl font-bold text-gray-800 mb-4 flex justify-center items-center gap-2" >
+            {t("see_more")}
+            <FaEye className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
           </h1>
-          <div className="w-20 h-1 bg-orange-500 mx-auto"></div>
+          <h1 className="text-2xl font-bold text-gray-600 mb-4 flex justify-center items-center">
+          {t("category")} : {locations[0]?.category?.name || t("loading")}
+          </h1>
+          <div className="w-36 h-1 bg-orange-500 mx-auto"></div>
         </div>
         <div className="text-left mt-4">
           <button

@@ -128,13 +128,21 @@ const LandingAdmin = () => {
           </h1>
           <div className="w-20 h-1 bg-orange-500 mx-auto"></div>
         </div>
-        <Link to={`/addlocationadmin`}>
+        <Link to={`/homeadmin`}>
           <div className="text-left mt-4">
             <button className="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow transition duration-200">
               {t("back")}
             </button>
           </div>
         </Link>
+
+        <Link to={`/addlocationadmin`}>
+                <div className="text-right">
+                  <button className="px-6 py-2 bg-green-500 hover:bg-green-600 font-semibold text-white rounded-lg shadow transition duration-200">
+                    {t("goto_add")}
+                  </button>
+                </div>
+              </Link>
       </header>
 
       {/* Filters */}

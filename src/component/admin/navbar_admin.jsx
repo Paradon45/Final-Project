@@ -5,6 +5,8 @@ import Login from "../../layout/login";
 import Register from "../../layout/register";
 import Translations from "../../system/translations";
 import { useNavigate } from "react-router-dom";
+import { FaArrowRightToBracket } from "react-icons/fa6";
+
 
 const NavbarAdmin = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -25,7 +27,6 @@ const NavbarAdmin = () => {
       setUserID(storedUserID);
       setFirstName(localStorage.getItem("firstName") || "User"); // Default to "User" if firstName is not stored
     }
-   
 
     const handleScroll = () => {
       if (window.scrollY > lastScrollY) {
@@ -61,22 +62,27 @@ const NavbarAdmin = () => {
         <div className="container mx-auto flex justify-between items-center px-4">
           {/* Left Menu */}
           <ul className="flex gap-8">
-            {["homeadmin", "attractionadmin", "cafepageadmin", "staypageadmin", "recommendadmin", "planadmin"].map(
-              (item) => (
-                <li key={item}>
-                  <Link
-                    to={`/${item}`}
-                    className="hover:text-yellow-300 transition duration-300"
-                    style={{
-                      width: "70px",
-                      textAlign: "center",
-                    }}
-                  >
-                    {t(item)}
-                  </Link>
-                </li>
-              )
-            )}
+            {[
+              "homeadmin",
+              "attractionadmin",
+              "cafepageadmin",
+              "staypageadmin",
+              "recommendadmin",
+              "planadmin",
+            ].map((item) => (
+              <li key={item}>
+                <Link
+                  to={`/${item}`}
+                  className="hover:text-yellow-300 transition duration-300"
+                  style={{
+                    width: "70px",
+                    textAlign: "center",
+                  }}
+                >
+                  {t(item)}
+                </Link>
+              </li>
+            ))}
           </ul>
 
           {/* Right Menu */}
@@ -86,22 +92,30 @@ const NavbarAdmin = () => {
             </li>
             {userID ? (
               <>
-              <Link to={`/addlocationadmin`} className="text-orange-600 hover:text-yellow-300 font-bold transition duration-300"
-              style={{
-                width: "150px",
-                textAlign: "center",
-              }}>{t("edit")}</Link>
-                <li className="animate-fadeIn2 text-yellow-300 font-bold">{firstName}</li>
+                <Link
+                  to={`/landingadmin`}
+                  className="text-orange-600 hover:text-yellow-300 font-bold transition duration-300"
+                  style={{
+                    width: "150px",
+                    textAlign: "center",
+                  }}
+                >
+                  {t("edit")}
+                </Link>
+                <li className="animate-fadeIn2 text-yellow-300 font-bold">
+                  {firstName}
+                </li>
                 <li className="animate-fadeIn2 text-orange-500 ">(ADMIN)</li>
                 <li>
                   <button
                     onClick={handleLogout}
-                    className="animate-fadeIn2 hover:text-yellow-300 transition duration-300 px-3 py-1 border border-yellow-400 rounded-full"
+                    className="animate-fadeIn2 hover:text-yellow-300 transition duration-300 px-3 py-1 border border-yellow-400 rounded-full flex items-center justify-center gap-2"
                     style={{
-                      width: "120px",
+                      width: "140px",
                       textAlign: "center",
                     }}
                   >
+                    <FaArrowRightToBracket />
                     {t("logout")}
                   </button>
                 </li>

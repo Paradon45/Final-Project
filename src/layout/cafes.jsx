@@ -51,7 +51,8 @@ const CafeDetail = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
-  const { name, description, locationImg, address, phone, date } = location;
+  const { name, description, locationImg, address, phone, date, map } =
+    location;
 
   return (
     <div className="bg-gray-100 font-kanit min-h-screen">
@@ -106,7 +107,9 @@ const CafeDetail = () => {
       </section>
 
       <section className="max-w-5xl mx-auto px-4 py-8">
-        <h3 className="text-2xl font-bold text-gray-800 mb-4">{t("more_images")}</h3>
+        <h3 className="text-2xl font-bold text-gray-800 mb-4">
+          {t("more_images")}
+        </h3>
         <div className="grid md:grid-cols-3 gap-6">
           {locationImg.map((image, index) => (
             <img
@@ -137,6 +140,32 @@ const CafeDetail = () => {
           </div>
         </div>
       )}
+
+      <div className="bg-gray-100 py-10 flex justify-center">
+        <div className="bg-white shadow-xl rounded-lg p-8 w-full max-w-5xl border border-gray-200">
+          {/* Title */}
+          <h2 className="text-2xl font-semibold text-gray-800 text-left mb-6">
+          {t("map")}
+          </h2>
+
+          {/* Google Map Container */}
+          <div className="flex justify-center">
+            <div className="rounded-lg overflow-hidden shadow-md border border-gray-300 bg-white w-full max-w-3xl">
+              <div className="relative" style={{ paddingTop: "56.25%" }}>
+                <iframe
+                  src={map}
+                  className="absolute top-0 left-0 w-full h-full"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Google Map"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
