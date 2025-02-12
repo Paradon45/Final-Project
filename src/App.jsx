@@ -20,6 +20,7 @@ import StayDetail from "./layout/stays";
 import SeeMore from "./layout/seeMore";
 import Landing from "./layout/landing";
 import Profile from "./layout/profile";
+import Recommend from "./layout/recommend";
 
 import HomeAdmin from "./layout/admin/home_admin";
 import NavbarAdmin from "./component/admin/navbar_admin";
@@ -69,6 +70,7 @@ const App = () => {
           <Route path="/viewpointadmin/:locationId" element={<ViewPointPageAdmin />} />
           <Route path="/cafepage" element={<Cafepage />} />
           <Route path="/staypage" element={<Staypage />} />
+          <Route path="/recommend" element={<Recommend />} />
           <Route path="/cafes/:locationId" element={<CafeDetail />} />
           <Route path="/stays/:locationId" element={<StayDetail />} />
           <Route path="/homeadmin" element={<HomeAdmin />} />

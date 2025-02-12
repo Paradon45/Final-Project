@@ -107,7 +107,7 @@ const Attractions = () => {
                         <h2 className="text-5xl text-red-600 font-bold mb-4">
                           {locations[0]?.category.name || t("category")}
                         </h2>
-                        <div className="w-50 h-1 bg-gray-200 mt-4"></div>
+                        <div className="w-50 h-1 bg-gray-200 mt-4 rounded-lg"></div>
                         {/* Display locations in the category */}
                         <div>
                           {locations.slice(0, 4).map((attraction, index) => (

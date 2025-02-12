@@ -40,7 +40,7 @@ const Cafepage = () => {
           {t("staypage")}
           <FaHotel className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
         </h2>
-        <div className="w-20 h-1 bg-orange-500 mx-auto"></div>
+        <div className="w-20 h-1 bg-orange-500 mx-auto rounded-lg"></div>
       </div>
 
       {loading && <p className="text-xl font-bold text-center">{t("loading")}</p>}
