@@ -10,6 +10,7 @@
     "staypage" : "ที่พัก",
     "staypageadmin" : "ที่พัก",
     "recommend" : "แนะนำที่เที่ยว",
+    "recommendpage" : "แนะนำสถานที่ท่องเที่ยว",
     "recommendadmin" : "แนะนำที่เที่ยว",
     "plans" : "แพลนเที่ยว",
     "planadmin" : "แพลนเที่ยว",
@@ -98,6 +99,8 @@
     "cost" : "รายจ่าย",
     "spending_chart" : "แผนภูมิการใช้จ่าย",
     "alert" : "แจ้งเตือน",
+    "filter" : "ตัวกรอง",
+    "addplans" : "เพิ่มไปยังแพลนเที่ยว",
     "close" : "ปิด"
     
   }

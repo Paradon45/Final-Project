@@ -10,6 +10,7 @@
     "staypage" : "Hotels",
     "staypageadmin" : "Hotels",
     "recommend" : "Recommendation",
+    "recommendpage" : "Recommended Attractions",
     "recommendadmin" : "Recommendation",
     "plans" : "Plans",
     "planadmin" : "Plans",
@@ -98,6 +99,8 @@
     "cost" : "Cost",
     "spending_chart" : "Spending Chart",
     "alert" : "Notifications",
+    "filter" : "Filter",
+    "addplans" : "Add to travel plan",
     "close" : "Close"
   }
   
