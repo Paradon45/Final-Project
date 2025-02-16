@@ -100,6 +100,7 @@
     "more_images" : "More Images",
 
     "no_locations" : "The location you were looking for was not found.",
+    "err_trip" : "Must have at least 1 location.",
     "travel_history" : "Travel History",
     "date" : "yy-mm-dd",
     "cost" : "Cost",

@@ -43,7 +43,7 @@ function TripPlanner() {
       days.map((day) => {
         if (day.id === dayId) {
           if (day.places.length === 1) {
-            showToast("ต้องมีสถานที่อย่างน้อย 1 สถานที่");
+            showToast(t("err_trip"));
             return day;
           }
           return { ...day, places: day.places.slice(0, -1) };
