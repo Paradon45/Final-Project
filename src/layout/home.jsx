@@ -105,14 +105,14 @@ const Home = () => {
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyDown} // ✅ เพิ่ม event เมื่อกด Enter
-                placeholder={t("ph_seach")}
+                placeholder={t("ph_search")}
                 className="flex-1 px-4 py-2 w-full rounded-l-md border border-gray-300 outline-none text-black"
               />
               <button
                 onClick={handleSearchSubmit}
                 className="px-4 py-2 bg-white hover:bg-gray-200 rounded-r-md text-gray-400 border border-gray-300"
               >
-                {t("seach")}
+                {t("search")}
               </button>
             </div>
 

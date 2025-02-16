@@ -57,8 +57,8 @@
 
     "headers" : "Phra Mahathat Kaen Nakhon",
     "des" : "Located inside Wat Nong Waeng, on the banks of Bueng Kaen Nakhon, Phra Mahathat Kaen Nakhon is a reinforced concrete building made of brick and mortar with a chedi-shaped roof, modeled after Phra That Kham Kaen.",
-    "ph_seach" : "Find tourist attractions in Khon Kaen Province",
-    "seach" : "Seach",
+    "ph_search" : "Find tourist attractions in Khon Kaen Province",
+    "search" : "Search",
 
     "khonkaen" : "In Khonkaen",
     "all_locations" : "All Locations",
@@ -107,7 +107,17 @@
     "spending_chart" : "Spending Chart",
     "alert" : "Notifications",
     "filter" : "Filter",
-    "addplans" : "Add to travel plan",
-    "close" : "Close"
+    "addplans" : "+ Add",
+    "close" : "Close",
+
+    "budget" : "Choose your budget",
+    "error_budget" : "Please select a budget.",
+    "low" : "Low",
+    "medium" : "Medium",
+    "high" : "High",
+
+    "added_places" : "Add to travel plan",
+    "no_added_places" : "No locations added.",
+    "already_in_plan" : "This location has been added."
   }
   

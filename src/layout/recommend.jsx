@@ -1,108 +1,59 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaMap } from "react-icons/fa";
-
-const places = [
-  {
-    id: 1,
-    name: "จุดชมวิวหินช้างสี",
-    category: "ธรรมชาติ",
-    image: "/images/viewpoint.jpg",
-    rating: 4,
-    season: "หน้าร้อน",
-    budget: "ต่ำ",
-    activity: "เดินป่า",
-  },
-  {
-    id: 2,
-    name: "พระมหาธาตุแก่นนคร พระธาตุ 9 ชั้น",
-    category: "วัด",
-    image: "/images/phra-maha-that.jpg",
-    rating: 4,
-    season: "หน้าหนาว",
-    budget: "ปานกลาง",
-    activity: "ไหว้พระ",
-  },
-  {
-    id: 3,
-    name: "เขื่อนอุบลรัตน์",
-    category: "ธรรมชาติ",
-    image: "/images/dam.jpg",
-    rating: 4,
-    season: "หน้าฝน",
-    budget: "สูง",
-    activity: "ถ่ายรูป",
-  },
-  {
-    id: 4,
-    name: "เขื่อนอุบลรัตน์",
-    category: "ธรรมชาติ",
-    image: "/images/dam.jpg",
-    rating: 4,
-    season: "หน้าฝน",
-    budget: "สูง",
-    activity: "ถ่ายรูป",
-  },
-];
+import { useToast } from "../component/ToastComponent";
+import AddedPlacesModal from "../component/addedplaces";
 
 const SearchSection = ({ onSearch }) => {
-  const [season, setSeason] = useState("");
   const [budget, setBudget] = useState("");
-  const [activity, setActivity] = useState("");
+  const [categoryId, setCategoryId] = useState("");
   const { t } = useTranslation();
 
   const handleSearch = () => {
-    onSearch({ season, budget, activity });
+    onSearch({ budget, categoryId });
   };
 
   return (
-    <div className="animate-fadeInDelay2 font-kanit bg-white shadow-lg rounded-lg p-6 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-9 w-9/12 mx-auto">
+    <div className="animate-fadeInDelay2 font-kanit bg-white shadow-lg rounded-lg p-6 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-11 w-6/12 mx-auto">
       <select
-        className="ml-3 border p-2 rounded-md "
-        value={season}
-        onChange={(e) => setSeason(e.target.value)}
-      >
-        <option value="">เลือกฤดู</option>
-        <option value="หน้าร้อน">หน้าร้อน</option>
-        <option value="หน้าหนาว">หน้าหนาว</option>
-        <option value="หน้าฝน">หน้าฝน</option>
-      </select>
-      <select
-        className="border p-2 rounded-md "
+        className="border p-2 rounded-md"
         value={budget}
         onChange={(e) => setBudget(e.target.value)}
       >
-        <option value="">เลือกงบประมาณ</option>
-        <option value="ต่ำ">ต่ำ</option>
-        <option value="ปานกลาง">ปานกลาง</option>
-        <option value="สูง">สูง</option>
+        <option value="">{t("budget")}</option>
+        <option value="LOW">{t("low")}</option>
+        <option value="MEDIUM">{t("medium")}</option>
+        <option value="HIGH">{t("high")}</option>
       </select>
       <select
-        className="border p-2 rounded-md "
-        value={activity}
-        onChange={(e) => setActivity(e.target.value)}
+        className="border p-2 rounded-md"
+        value={categoryId}
+        onChange={(e) => setCategoryId(e.target.value)}
       >
-        <option value="">เลือกกิจกรรม</option>
-        <option value="เดินป่า">เดินป่า</option>
-        <option value="ไหว้พระ">ไหว้พระ</option>
-        <option value="ถ่ายรูป">ถ่ายรูป</option>
+        <option value="">{t("ph_category")}</option>
+        <option value="1">{t("nature")}</option>
+        <option value="2">{t("temples")}</option>
+        <option value="3">{t("markets")}</option>
+        <option value="5">{t("cafepage")}</option>
+        <option value="6">{t("staypage")}</option>
+        <option value="7">{t("others")}</option>
       </select>
       <button
         className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 duration-200"
         onClick={handleSearch}
       >
-        {t("seach")}
+        {t("search")}
       </button>
     </div>
   );
 };
 
-const PlaceCard = ({ place }) => {
+const PlaceCard = ({ place, onAdd }) => {
   const { t } = useTranslation();
   return (
     <div className="animate-fadeIn3Delay1 font-kanit bg-white shadow-lg rounded-lg p-4 w-80">
       <img
-        src={place.image}
+        src={place.locationImg[0].url}
         alt={place.name}
         className="w-full h-48 object-cover rounded-lg"
       />
@@ -112,7 +63,7 @@ const PlaceCard = ({ place }) => {
             <span
               key={i}
               className={`text-yellow-500 ${
-                i < place.rating ? "opacity-100" : "opacity-30"
+                i < place.averageScore ? "opacity-100" : "opacity-30"
               }`}
             >
               ★
@@ -120,10 +71,14 @@ const PlaceCard = ({ place }) => {
           ))}
         </div>
         <span className="inline-block bg-red-500 text-white text-sm px-2 py-1 rounded mt-2">
-          {place.category}
+          {place.category.name}
         </span>
         <h3 className="text-lg font-bold mt-2">{place.name}</h3>
-        <button className="mt-3 bg-orange-500 text-white px-4 py-2 rounded-md w-full">
+
+        <button
+          className="mt-3 bg-orange-500 text-white px-4 py-2 rounded-md w-full hover:bg-orange-600 duration-200"
+          onClick={() => onAdd(place)}
+        >
           {t("addplans")}
         </button>
       </div>
@@ -132,70 +87,115 @@ const PlaceCard = ({ place }) => {
 };
 
 const SeeMorePage = () => {
+  const { ToastComponent, showToast } = useToast();
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const [filteredPlaces, setFilteredPlaces] = useState([]);
+  const [selectedPlaces, setSelectedPlaces] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { t } = useTranslation();
 
-  const handleSearch = (filters) => {
-    const results = places.filter(
-      (place) =>
-        (!filters.season || place.season === filters.season) &&
-        (!filters.budget || place.budget === filters.budget) &&
-        (!filters.activity || place.activity === filters.activity)
-    );
-    setFilteredPlaces(results);
+  const handleSearch = async (filters) => {
+    try {
+      const response = await fetch("http://localhost:8000/location/recommend", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(filters),
+      });
+
+      if (!response.ok) {
+        if (response.status === 400) {
+          showToast(t("error_budget"));
+          return;
+        }
+        showToast(t("unknown_error"));
+        return;
+      }
+      const data = await response.json();
+      setFilteredPlaces(data.recommendedLocations);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      showToast(t("fetch_error"));
+    }
+  };
+
+  const handleAddToPlan = (place) => {
+    setSelectedPlaces((prevSelectedPlaces) => {
+      if (!prevSelectedPlaces.find((p) => p.locationId === place.locationId)) {
+        return [...prevSelectedPlaces, place];
+      }
+      showToast(t("already_in_plan"));
+      return prevSelectedPlaces;
+    });
   };
 
   return (
-    <div className="animate-fadeIn font-kanit p-8 bg-gradient-to-b from-gray-200 to-white min-h-screen md:p-16 max-w-7xl mx-auto">
-      {/* Search Section */}
-      <div className="text-center mb-11">
-        <h2 className="text-4xl font-bold text-gray-800 mb-4 mt-5 flex justify-center items-center">
-          {t("recommendpage")}
-          <FaMap className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
-        </h2>
-        <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto mb-7 rounded-lg"></div>
-        <SearchSection onSearch={handleSearch} />
-      </div>
-
-      {/* Places Section */}
-      {filteredPlaces.length > 0 && (
-        <div className="animate-fadeIn2Delay1 mb-8">
-          <h2 className="text-3xl font-bold mb-4">{t("attractions")}</h2>
-          <div className="flex justify-end">
-            <button className="bg-gray-300 px-4 py-2 mb-4 rounded-md">
-              {t("filter")}
-            </button>
-          </div>
-
-          {/* ช่องแสดงผลที่เลื่อนได้ */}
-          <div
-            className="bg-gray-100 overflow-x-auto max-w-full p-7 border border-gray-200 rounded-lg shadow-inner"
-            style={{
-              scrollbarWidth: "thin",
-              scrollbarColor: "#cbd5e0 #f7fafc",
-            }}
-          >
-            <div
-              className="flex gap-6 flex-nowrap scroll-smooth"
-              style={{
-                minWidth: "100%", // ป้องกันช่องว่างถ้ายังไม่มีข้อมูล
-                scrollSnapType: "x mandatory", // ทำให้เลื่อนได้แบบ smooth
-              }}
+    <div>
+      {ToastComponent}
+      <div className="animate-fadeIn font-kanit p-8 bg-gradient-to-b from-gray-200 to-white min-h-screen md:p-16 max-w-7xl mx-auto">
+        <div className="text-center mb-11">
+          <h2 className="text-4xl font-bold text-gray-800 mb-4 mt-5 flex justify-center items-center">
+            {t("recommendpage")}
+            <FaMap className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
+          </h2>
+          <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto mb-7 rounded-lg"></div>
+          <SearchSection onSearch={handleSearch} />
+        </div>
+        <div className="relative w-full flex justify-end mt-3">
+          <div className="relative inline-block ">
+            <button
+              className="bg-green-500 text-white text-lg px-4 py-3 font-semibold rounded-md mb-4 hover:bg-green-600 duration-200 relative"
+              onClick={() => setIsModalOpen(true)}
             >
-              {filteredPlaces.map((place) => (
-                <div key={place.id} className="scroll-snap-align-start">
-                  <PlaceCard place={place} />
-                </div>
-              ))}
-            </div>
+              {t("added_places")}
+            </button>
+            {selectedPlaces.length > 0 && (
+              <span className="animate-fadeIn2 absolute  -top-2 -right-2 bg-red-500 text-white text-base font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {selectedPlaces.length}
+              </span>
+            )}
           </div>
         </div>
-      )}
-      <div className="mb-6 mt-4 w-11/12 h-1 rounded-lg bg-gray-300 mx-auto"></div>
+
+        {filteredPlaces.length > 0 && (
+          <div className="animate-fadeIn2Delay1 mb-8">
+            <h2 className="text-3xl font-bold mb-4">{t("attractions")}</h2>
+
+            <div
+              className="bg-gray-100 overflow-x-auto max-w-full p-7 border border-gray-200 rounded-lg shadow-inner"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "#cbd5e0 #f7fafc",
+              }}
+            >
+              <div
+                className="flex gap-6 flex-nowrap scroll-smooth"
+                style={{ minWidth: "100%", scrollSnapType: "x mandatory" }}
+              >
+                {filteredPlaces.map((place) => (
+                  <div
+                    key={place.locationId}
+                    className="scroll-snap-align-start"
+                  >
+                    <PlaceCard place={place} onAdd={handleAddToPlan} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        <AddedPlacesModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          selectedPlaces={selectedPlaces}
+          setSelectedPlaces={setSelectedPlaces}
+        />
+        <div className="mb-6 mt-4 w-11/12 h-1 rounded-lg bg-gray-300 mx-auto"></div>
+      </div>
     </div>
   );
 };

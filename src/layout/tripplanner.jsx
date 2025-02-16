@@ -3,15 +3,50 @@ import { FaMapMarkedAlt } from "react-icons/fa";
 import { useToast } from "../component/ToastComponent";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { FaTimes,FaPlus,FaMinus } from "react-icons/fa";
-
-const locations = [
-  { id: 1, name: "พระมหาธาตุแก่นนคร พระธาตุ 9 ชั้น", image: "place1.jpg" },
-  { id: 2, name: "จุดชมวิวหินช้างสี", image: "place2.jpg" },
-  { id: 3, name: "เขื่อนอุบลรัตน์", image: "place3.jpg" },
-];
+import { FaTimes, FaPlus, FaMinus } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
 
 function TripPlanner() {
+  const location = useLocation();
+  const { locationIds } = location.state || {};
+
+  const [locations, setLocations] = useState([]);
+  const [filteredLocations, setFilteredLocations] = useState([]);
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await fetch("http://localhost:8000/location/landing");
+        const data = await response.json();
+
+        // แปลงข้อมูลจาก object เป็น array
+        const locationsArray = Object.values(data.locations);
+
+        if (Array.isArray(locationsArray)) {
+          setLocations(locationsArray);
+
+          // กรองสถานที่ตาม locationIds (ถ้ามี)
+          if (locationIds && Array.isArray(locationIds)) {
+            const filtered = locationsArray.filter((loc) =>
+              locationIds.includes(loc.locationId)
+            );
+            setFilteredLocations(filtered);
+          } else {
+            setFilteredLocations([]); // ไม่กรองหากไม่มี locationIds
+          }
+        } else {
+          console.error("Data from API is not an object or cannot be converted to array:", data);
+          setFilteredLocations([]);
+        }
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        setFilteredLocations([]);
+      }
+    };
+
+    fetchLocations();
+  }, [locationIds]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -58,8 +93,8 @@ function TripPlanner() {
       days.map((day) => {
         if (day.id === dayId) {
           const updatedPlaces = [...day.places];
-          updatedPlaces[index] = locations.find(
-            (loc) => loc.id === parseInt(placeId)
+          updatedPlaces[index] = filteredLocations.find(
+            (loc) => loc.locationId === parseInt(placeId)
           );
           return { ...day, places: updatedPlaces };
         }
@@ -83,9 +118,9 @@ function TripPlanner() {
             <motion.div
               key={day.id}
               className="mb-6 p-8 bg-white rounded-lg shadow-md relative"
-              initial={{ opacity: 0, scale: 0.9 }} // เริ่มต้นเล็กและจาง
-              animate={{ opacity: 1, scale: 1 }} // ค่อยๆ ขยายขึ้น
-              exit={{ opacity: 0, scale: 0.9 }} // ค่อยๆ หายไปเมื่อถูกลบ
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.5 }}
             >
               <div className="flex items-center mb-4">
@@ -97,7 +132,7 @@ function TripPlanner() {
                     onClick={() => removeDay(day.id)}
                     className=" text-red-500 px-3 py-0 rounded text-2xl font-semibold absolute top-2 right-0  hover:text-red-600 duration-200"
                   >
-                    <FaTimes/>
+                    <FaTimes />
                   </button>
                 )}
 
@@ -106,14 +141,14 @@ function TripPlanner() {
                     className="bg-green-500 text-white px-3 py-2 rounded text-base hover:bg-green-600 duration-200"
                     onClick={() => addPlace(day.id)}
                   >
-                    <FaPlus/>
+                    <FaPlus />
                   </button>
 
                   <button
                     className="bg-red-500 text-white px-3 py-2 rounded text-base hover:bg-red-600 duration-200"
                     onClick={() => removeLastPlace(day.id)}
                   >
-                    <FaMinus/>
+                    <FaMinus />
                   </button>
                 </div>
               </div>
@@ -125,10 +160,10 @@ function TripPlanner() {
                       <motion.div
                         key={index}
                         className="flex-none w-72 bg-gray-50 p-3 rounded-lg shadow"
-                        initial={{ opacity: 0, scale: 0.8 }} // เริ่มต้นจางและเล็ก
-                        animate={{ opacity: 1, scale: 1 }} // ค่อยๆ ขยายและชัดขึ้น
-                        exit={{ opacity: 0, scale: 0.8 }} // ค่อยๆ หายไปเมื่อถูกลบ
-                        transition={{ duration: 0.3 }} // ความเร็วของ Animation
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.3 }}
                       >
                         <select
                           className="p-2 border rounded w-full"
@@ -137,8 +172,8 @@ function TripPlanner() {
                           }
                         >
                           <option value="">{t("choose")}</option>
-                          {locations.map((loc) => (
-                            <option key={loc.id} value={loc.id}>
+                          {locationIds && Array.isArray(filteredLocations) && filteredLocations.map((loc) => (
+                            <option key={loc.locationId} value={loc.locationId}>
                               {loc.name}
                             </option>
                           ))}
@@ -146,7 +181,7 @@ function TripPlanner() {
                         {place && (
                           <div className="flex items-center gap-2 mt-2">
                             <img
-                              src={place.image}
+                              src={place.locationImg[0].url}
                               alt={place.name}
                               className="w-64 h-24 rounded"
                             />
