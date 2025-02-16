@@ -25,7 +25,7 @@ export const useToast = () => {
         <Toast.Root
           open={open}
           onOpenChange={setOpen}
-          className="animate-fadeOut fixed top-14 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+          className="font-kanit animate-fadeOut fixed top-14 left-1/2 transform -translate-x-1/2 -translate-y-1/2
                      bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-300"
         >
           <Toast.Title className="font-bold text-lg text-center">

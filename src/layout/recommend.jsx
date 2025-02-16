@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaMap } from "react-icons/fa";
 
@@ -51,7 +51,6 @@ const SearchSection = ({ onSearch }) => {
   const [activity, setActivity] = useState("");
   const { t } = useTranslation();
 
-
   const handleSearch = () => {
     onSearch({ season, budget, activity });
   };
@@ -89,7 +88,7 @@ const SearchSection = ({ onSearch }) => {
         <option value="ถ่ายรูป">ถ่ายรูป</option>
       </select>
       <button
-        className="bg-orange-500 text-white px-4 py-2 rounded-md"
+        className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 duration-200"
         onClick={handleSearch}
       >
         {t("seach")}
@@ -99,9 +98,9 @@ const SearchSection = ({ onSearch }) => {
 };
 
 const PlaceCard = ({ place }) => {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
   return (
-    <div className="font-kanit bg-white shadow-lg rounded-lg p-4 w-80">
+    <div className="animate-fadeIn3Delay1 font-kanit bg-white shadow-lg rounded-lg p-4 w-80">
       <img
         src={place.image}
         alt={place.name}
@@ -133,6 +132,10 @@ const PlaceCard = ({ place }) => {
 };
 
 const SeeMorePage = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [filteredPlaces, setFilteredPlaces] = useState([]);
   const { t } = useTranslation();
 
@@ -160,7 +163,7 @@ const SeeMorePage = () => {
 
       {/* Places Section */}
       {filteredPlaces.length > 0 && (
-        <div className="mb-8">
+        <div className="animate-fadeIn2Delay1 mb-8">
           <h2 className="text-3xl font-bold mb-4">{t("attractions")}</h2>
           <div className="flex justify-end">
             <button className="bg-gray-300 px-4 py-2 mb-4 rounded-md">

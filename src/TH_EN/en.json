@@ -13,6 +13,7 @@
     "recommendpage" : "Recommended Attractions",
     "recommendadmin" : "Recommendation",
     "plans" : "Plans",
+    "tripplanner" : "Plan a Trip",
     "planadmin" : "Plans",
     "contactadmin" : "Contact",
     "login" : "Login",
@@ -75,6 +76,11 @@
     "edit_location" : "Edit",
     "cancel" : "Cancel",
     "update" : "Update",
+    "save" : "Save",
+    "addday" : "+ Add days",
+    "choose" : "Select location",
+    "day" : "Day",
+
 
     "addpage" : "Add Attractions",
     "name" : "Name",

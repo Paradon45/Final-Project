@@ -21,6 +21,7 @@ import SeeMore from "./layout/seeMore";
 import Landing from "./layout/landing";
 import Profile from "./layout/profile";
 import Recommend from "./layout/recommend";
+import TripPlanner from "./layout/tripplanner";
 
 import HomeAdmin from "./layout/admin/home_admin";
 import NavbarAdmin from "./component/admin/navbar_admin";
@@ -71,6 +72,7 @@ const App = () => {
           <Route path="/cafepage" element={<Cafepage />} />
           <Route path="/staypage" element={<Staypage />} />
           <Route path="/recommend" element={<Recommend />} />
+          <Route path="/plans" element={<TripPlanner />} />
           <Route path="/cafes/:locationId" element={<CafeDetail />} />
           <Route path="/stays/:locationId" element={<StayDetail />} />
           <Route path="/homeadmin" element={<HomeAdmin />} />
