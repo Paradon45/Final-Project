@@ -182,9 +182,9 @@ const AddLocationPageAdmin = () => {
             <option value="1">{t("nature")}</option>
             <option value="2">{t("temples")}</option>
             <option value="3">{t("markets")}</option>
-            <option value="5">{t("cafepage")}</option>
-            <option value="6">{t("staypage")}</option>
-            <option value="4">{t("others")}</option>
+            <option value="4">{t("cafepage")}</option>
+            <option value="5">{t("staypage")}</option>
+            <option value="6">{t("others")}</option>
           </select>
         </div>
 

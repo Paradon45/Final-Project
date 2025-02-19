@@ -22,7 +22,7 @@ const Attractions = () => {
 
         // Group attractions by categoryId and filter to include only categoryId 1-4
         const grouped = data.locations.reduce((acc, location) => {
-          if ([1, 2, 3, 4].includes(location.categoryId)) {
+          if ([1, 2, 3, 6].includes(location.categoryId)) {
             acc[location.categoryId] = acc[location.categoryId] || [];
             acc[location.categoryId].push(location);
           }

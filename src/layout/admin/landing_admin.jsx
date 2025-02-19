@@ -24,9 +24,9 @@ const LandingAdmin = () => {
     { id: "1", name: t("nature") },
     { id: "2", name: t("temples") },
     { id: "3", name: t("markets") },
-    { id: "4", name: t("others") },
-    { id: "5", name: t("cafepage") },
-    { id: "6", name: t("staypage") },
+    { id: "4", name: t("cafepage") },
+    { id: "5", name: t("staypage") },
+    { id: "6", name: t("others") },
   ];
 
   useEffect(() => {
@@ -168,7 +168,7 @@ const LandingAdmin = () => {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={t("ph_seach")}
+          placeholder={t("ph_search")}
           className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-lg shadow focus:outline-none focus:ring focus:ring-orange-300"
         />
       </div>

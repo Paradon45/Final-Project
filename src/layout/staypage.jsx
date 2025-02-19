@@ -21,7 +21,7 @@ const Cafepage = () => {
         }
         const data = await response.json();
         
-        const filteredstays = data.locations.filter(location => location.categoryId === 6);
+        const filteredstays = data.locations.filter(location => location.categoryId === 5);
         setStays(filteredstays);
       } catch (err) {
         setError(err.message);

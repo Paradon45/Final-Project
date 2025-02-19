@@ -4,11 +4,12 @@ import { useToast } from "../component/ToastComponent";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { FaTimes, FaPlus, FaMinus } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 
 function TripPlanner() {
   const location = useLocation();
   const { locationIds } = location.state || {};
+  const navigate = useNavigate();
 
   const [locations, setLocations] = useState([]);
   const [filteredLocations, setFilteredLocations] = useState([]);
@@ -35,7 +36,10 @@ function TripPlanner() {
             setFilteredLocations([]); // ไม่กรองหากไม่มี locationIds
           }
         } else {
-          console.error("Data from API is not an object or cannot be converted to array:", data);
+          console.error(
+            "Data from API is not an object or cannot be converted to array:",
+            data
+          );
           setFilteredLocations([]);
         }
       } catch (error) {
@@ -93,15 +97,22 @@ function TripPlanner() {
       days.map((day) => {
         if (day.id === dayId) {
           const updatedPlaces = [...day.places];
-          updatedPlaces[index] = filteredLocations.find(
-            (loc) => loc.locationId === parseInt(placeId)
-          );
+          updatedPlaces[index] = placeId
+            ? filteredLocations.find(
+                (loc) => loc.locationId === parseInt(placeId)
+              )
+            : null;
           return { ...day, places: updatedPlaces };
         }
         return day;
       })
     );
   };
+
+  const selectedLocationIds = days
+    .flatMap((day) => day.places)
+    .filter((place) => place !== null) // กรองค่า null ออก
+    .map((place) => place.locationId); // ดึงเฉพาะ locationId
 
   return (
     <div>
@@ -114,87 +125,115 @@ function TripPlanner() {
         <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto mb-7 rounded-lg"></div>
 
         <AnimatePresence>
-          {days.map((day) => (
-            <motion.div
-              key={day.id}
-              className="mb-6 p-8 bg-white rounded-lg shadow-md relative"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="flex items-center mb-4">
-                <h2 className="text-2xl font-semibold flex-grow">
-                  {t("day")} {day.id}
-                </h2>
-                {day.id !== 1 && (
-                  <button
-                    onClick={() => removeDay(day.id)}
-                    className=" text-red-500 px-3 py-0 rounded text-2xl font-semibold absolute top-2 right-0  hover:text-red-600 duration-200"
+          {days.map((day) => {
+            const selectedLocationIdsForDay = day.places
+              .filter((place) => place !== null) // กรองค่า null ออก
+              .map((place) => place.locationId); // ดึง locationId เฉพาะของวันนั้น
+
+            return (
+              <motion.div
+                key={day.id}
+                className="mb-6 p-8 bg-white rounded-lg shadow-md relative"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="flex items-center mb-4">
+                  <h2 className="text-2xl font-semibold flex-grow">
+                    {t("day")} {day.id}
+                  </h2>
+                  {day.id !== 1 && (
+                    <button
+                      onClick={() => removeDay(day.id)}
+                      className="text-red-500 px-3 py-0 rounded text-2xl font-semibold absolute top-2 right-0 hover:text-red-600 duration-200"
+                    >
+                      <FaTimes />
+                    </button>
+                  )}
+                  <div className="flex space-x-3 ml-4 mr-5">
+                    <button
+                      className="bg-green-500 text-white px-3 py-2 rounded text-base hover:bg-green-600 duration-200"
+                      onClick={() => addPlace(day.id)}
+                    >
+                      <FaPlus />
+                    </button>
+
+                    <button
+                      className="bg-red-500 text-white px-3 py-2 rounded text-base hover:bg-red-600 duration-200"
+                      onClick={() => removeLastPlace(day.id)}
+                    >
+                      <FaMinus />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto border border-gray-300 bg-gray-100 rounded-lg p-2">
+                  <div className="flex flex-nowrap space-x-4">
+                    <AnimatePresence>
+                      {day.places.map((place, index) => (
+                        <motion.div
+                          key={index}
+                          className="flex-none w-72 bg-gray-50 p-3 rounded-lg shadow"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <select
+                            className="p-2 border rounded w-full"
+                            onChange={(e) =>
+                              updatePlace(day.id, index, e.target.value)
+                            }
+                          >
+                            <option value="">{t("choose")}</option>
+                            {locationIds &&
+                              Array.isArray(filteredLocations) &&
+                              filteredLocations.map((loc) => (
+                                <option
+                                  key={loc.locationId}
+                                  value={loc.locationId}
+                                >
+                                  {loc.name}
+                                </option>
+                              ))}
+                          </select>
+                          {place && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <img
+                                src={place.locationImg[0].url}
+                                alt={place.name}
+                                className="w-64 h-24 rounded"
+                              />
+                              <span>{place.name}</span>
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </div>
+
+                {/* ✅ ปุ่ม Save ของแต่ละวัน */}
+                {selectedLocationIdsForDay.length > 0 ? (
+                  <Link
+                    to="/googlemap"
+                    state={{ locationIds: selectedLocationIdsForDay }}
+                    className="block mx-auto mt-6 bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600 duration-200 text-center w-24"
                   >
-                    <FaTimes />
+                    {t("save")}
+                  </Link>
+                ) : (
+                  <button
+                    className="block mx-auto mt-6 bg-gray-400 text-white px-6 py-2 rounded cursor-not-allowed"
+                    disabled
+                  >
+                    {t("save")}
                   </button>
                 )}
-
-                <div className="flex space-x-3 ml-4 mr-5">
-                  <button
-                    className="bg-green-500 text-white px-3 py-2 rounded text-base hover:bg-green-600 duration-200"
-                    onClick={() => addPlace(day.id)}
-                  >
-                    <FaPlus />
-                  </button>
-
-                  <button
-                    className="bg-red-500 text-white px-3 py-2 rounded text-base hover:bg-red-600 duration-200"
-                    onClick={() => removeLastPlace(day.id)}
-                  >
-                    <FaMinus />
-                  </button>
-                </div>
-              </div>
-
-              <div className="overflow-x-auto border border-gray-300 bg-gray-100 rounded-lg p-2">
-                <div className="flex flex-nowrap space-x-4">
-                  <AnimatePresence>
-                    {day.places.map((place, index) => (
-                      <motion.div
-                        key={index}
-                        className="flex-none w-72 bg-gray-50 p-3 rounded-lg shadow"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <select
-                          className="p-2 border rounded w-full"
-                          onChange={(e) =>
-                            updatePlace(day.id, index, e.target.value)
-                          }
-                        >
-                          <option value="">{t("choose")}</option>
-                          {locationIds && Array.isArray(filteredLocations) && filteredLocations.map((loc) => (
-                            <option key={loc.locationId} value={loc.locationId}>
-                              {loc.name}
-                            </option>
-                          ))}
-                        </select>
-                        {place && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <img
-                              src={place.locationImg[0].url}
-                              alt={place.name}
-                              className="w-64 h-24 rounded"
-                            />
-                            <span>{place.name}</span>
-                          </div>
-                        )}
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
 
         <button
@@ -202,10 +241,6 @@ function TripPlanner() {
           onClick={addDay}
         >
           {t("addday")}
-        </button>
-
-        <button className="block mx-auto mt-6 bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600 duration-200">
-          {t("save")}
         </button>
       </div>
     </div>

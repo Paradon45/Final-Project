@@ -21,7 +21,7 @@ const Cafepage = () => {
         }
         const data = await response.json();
         
-        const filteredCafes = data.locations.filter(location => location.categoryId === 5);
+        const filteredCafes = data.locations.filter(location => location.categoryId === 4);
         setCafes(filteredCafes);
       } catch (err) {
         setError(err.message);

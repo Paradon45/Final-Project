@@ -34,9 +34,9 @@ const SearchSection = ({ onSearch }) => {
         <option value="1">{t("nature")}</option>
         <option value="2">{t("temples")}</option>
         <option value="3">{t("markets")}</option>
-        <option value="5">{t("cafepage")}</option>
-        <option value="6">{t("staypage")}</option>
-        <option value="7">{t("others")}</option>
+        <option value="4">{t("cafepage")}</option>
+        <option value="5">{t("staypage")}</option>
+        <option value="6">{t("others")}</option>
       </select>
       <button
         className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 duration-200"

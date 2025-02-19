@@ -22,6 +22,7 @@ import Landing from "./layout/landing";
 import Profile from "./layout/profile";
 import Recommend from "./layout/recommend";
 import TripPlanner from "./layout/tripplanner";
+import GoogleMapTest from "./layout/googlemaptest";
 
 import HomeAdmin from "./layout/admin/home_admin";
 import NavbarAdmin from "./component/admin/navbar_admin";
@@ -87,6 +88,7 @@ const App = () => {
           <Route path="/landing" element={<Landing/>} />
           <Route path="/landingadmin" element={<LandingAdmin/>} />
           <Route path="/landingadmin/:categoryId" element={<LandingAdmin/>} />
+          <Route path="/googlemap" element={<GoogleMapTest/>} />
         </Routes>
       </Layout>
     </Router>
