@@ -12,7 +12,7 @@ const Cafepage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    
+
     const fetchstays = async () => {
       try {
         const response = await fetch("http://localhost:8000/location/landing");
@@ -20,8 +20,10 @@ const Cafepage = () => {
           throw new Error("Failed to fetch stays data.");
         }
         const data = await response.json();
-        
-        const filteredstays = data.locations.filter(location => location.categoryId === 5);
+
+        const filteredstays = data.locations.filter(
+          (location) => location.categoryId === 5
+        );
         setStays(filteredstays);
       } catch (err) {
         setError(err.message);
@@ -29,7 +31,7 @@ const Cafepage = () => {
         setLoading(false);
       }
     };
-    
+
     fetchstays();
   }, []);
 
@@ -43,24 +45,38 @@ const Cafepage = () => {
         <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto rounded-lg"></div>
       </div>
 
-      {loading && <p className="text-xl font-bold text-center">{t("loading")}</p>}
-      {error && <p className="text-xl font-bold text-center text-red-500">{t("error_loading_data")}</p>}
-      
+      {loading && (
+        <p className="text-xl font-bold text-center">{t("loading")}</p>
+      )}
+      {error && (
+        <p className="text-xl font-bold text-center text-red-500">
+          {t("error_loading_data")}
+        </p>
+      )}
+
       {!loading && !error && (
         <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-8">
           {stays.map((stay, index) => (
             <div
               key={stay.locationId}
-              className={`relative bg-white border rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-2xl opacity-0 translate-y-10 delay-${index * 200} animate-fadeIn`}
+              className={`relative bg-white border rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-2xl opacity-0 translate-y-10 delay-${
+                index * 200
+              } animate-fadeIn`}
               style={{ animationDelay: `${index * 0.2}s` }}
             >
               <div className="relative group">
                 <img
-                  src={stay.locationImg[0]?.url || "https://via.placeholder.com/300"}
+                  src={
+                    stay.locationImg[0]?.url ||
+                    "https://via.placeholder.com/300"
+                  }
                   alt={stay.name}
                   className="w-full h-48 object-cover"
                 />
-                <Link to={`/stays/${stay.locationId}`} className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center text-white text-lg font-medium">
+                <Link
+                  to={`/stays/${stay.locationId}`}
+                  className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center text-white text-lg font-medium"
+                >
                   {t("see_more")}
                 </Link>
               </div>
@@ -68,9 +84,27 @@ const Cafepage = () => {
                 <h3 className="text-xl font-bold text-gray-800 mt-2">
                   {stay.name}
                 </h3>
-                <span className="text-yellow-500 text-2xl">★★★★★</span>
+                <span className="text-yellow-500 text-2xl">
+                  {[...Array(5)].map((_, i) => (
+                    <span
+                      key={i}
+                      className={`text-yellow-500 ${
+                        i < stay.locationScore[0]?.score
+                          ? "opacity-100"
+                          : "opacity-30"
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </span>
+                <span className="text-gray-600 ml-3">
+                  ({stay.locationScore[0]?.score || 0}.0)
+                </span>
                 <p className="text-gray-600 mt-3 text-sm leading-relaxed">
-                {stay.description.length > 100 ? `${stay.description.substring(0, 100)}...` : stay.description}
+                  {stay.description.length > 100
+                    ? `${stay.description.substring(0, 100)}...`
+                    : stay.description}
                 </p>
               </div>
             </div>

@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
+import Comments from "../component/comment";
 
 const CafeDetail = () => {
   const [location, setLocation] = useState(null);
@@ -16,6 +17,9 @@ const CafeDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+
+  const userId = localStorage.getItem("userID");
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchLocationDetails = async () => {
@@ -51,7 +55,7 @@ const CafeDetail = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
-  const { name, description, locationImg, address, phone, date, map } = location;
+  const { name, description, locationImg, address, phone, date, map, locationScore } = location;
 
   return (
     <div className="bg-gray-100 font-kanit min-h-screen">
@@ -99,7 +103,7 @@ const CafeDetail = () => {
           </div>
           <div className="flex items-center mt-6">
             <FaStar className="text-yellow-500 text-2xl" />
-            <p className="ml-2 text-xl font-bold text-gray-800">4.9</p>
+            <p className="ml-2 text-xl font-bold text-gray-800">({locationScore[0]?.score || 0}.0)</p>
             <span className="text-gray-500 text-lg ml-2">/ 5.0</span>
           </div>
         </div>
@@ -165,6 +169,7 @@ const CafeDetail = () => {
           </div>
         </div>
       </div>
+      <Comments locationId={locationId} userId={userId} token={token} />
     </div>
   );
 };

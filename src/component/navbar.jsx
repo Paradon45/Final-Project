@@ -88,6 +88,7 @@ const Navbar = () => {
                 <li className="animate-fadeIn2 text-yellow-400 font-bold hover:text-yellow-300 transition duration-200 ease-in-out">{firstName}</li>
                 </Link>
                 <li>
+                <Link to={"/home"}>
                   <button
                     onClick={handleLogout}
                     className="animate-fadeIn2 hover:text-yellow-300 transition duration-300 px-3 py-1 border border-yellow-400 rounded-full flex items-center justify-center gap-2"
@@ -100,6 +101,7 @@ const Navbar = () => {
                     {t("logout")}
                     
                   </button>
+                  </Link>
                 </li>
               </>
             ) : (

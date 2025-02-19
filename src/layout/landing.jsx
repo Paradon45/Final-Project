@@ -70,16 +70,12 @@ const Landing = () => {
           </h1>
           <div className="w-20 h-1 bg-orange-500 mx-auto"></div>
         </div>
-        <Link 
-        to={`/attractions`}
-        >
-        <div className="text-left mt-4">
-          <button
-            className="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow transition duration-200"
-          >
-            {t("back")}
-          </button>
-        </div>
+        <Link to={`/attractions`}>
+          <div className="text-left mt-4">
+            <button className="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow transition duration-200">
+              {t("back")}
+            </button>
+          </div>
         </Link>
       </header>
 
@@ -116,7 +112,9 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           {loading && <p className="text-center">{t("loading")}</p>}
           {error && (
-            <p className="text-center text-red-500">{t("error_loading_data")}</p>
+            <p className="text-center text-red-500">
+              {t("error_loading_data")}
+            </p>
           )}
           {!loading && !error && (
             <>
@@ -127,7 +125,10 @@ const Landing = () => {
               ) : (
                 <div
                   className="overflow-y-auto max-h-[500px] space-y-6 p-7 border border-gray-200 rounded-lg shadow-inner"
-                  style={{ scrollbarWidth: "thin", scrollbarColor: "#cbd5e0 #f7fafc" }}
+                  style={{
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "#cbd5e0 #f7fafc",
+                  }}
                 >
                   {filteredLocations.map((location) => (
                     <Link
@@ -137,7 +138,9 @@ const Landing = () => {
                       <div className="mb-4 flex items-center bg-gray-100 rounded-lg shadow-md p-4 hover:shadow-lg transform transition duration-200 hover:scale-105">
                         {/* Image */}
                         <img
-                          src={location.locationImg[0]?.url || "/placeholder.jpg"}
+                          src={
+                            location.locationImg[0]?.url || "/placeholder.jpg"
+                          }
                           alt={location.name}
                           className="w-32 h-32 object-cover rounded-lg mr-4"
                         />
@@ -150,9 +153,22 @@ const Landing = () => {
                             {location.description}
                           </p>
                           <div className="flex items-center mt-2">
-                            <span className="text-yellow-500">★★★★☆</span>
-                            <span className="text-gray-600 ml-2">
-                              ({location.rating || "4.0"})
+                            <span className="text-yellow-500 text-xl">
+                              {[...Array(5)].map((_, i) => (
+                                <span
+                                  key={i}
+                                  className={`text-yellow-500 ${
+                                    i < location.locationScore[0]?.score
+                                      ? "opacity-100"
+                                      : "opacity-30"
+                                  }`}
+                                >
+                                  ★
+                                </span>
+                              ))}
+                            </span>
+                            <span className="text-gray-600 ml-3">
+                              ({location.locationScore[0]?.score || 0}.0)
                             </span>
                           </div>
                         </div>

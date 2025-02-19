@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom"; // Import useParams
 import { useTranslation } from "react-i18next";
+import Comments from "../component/comment";
 
 
 const ViewPointPage = () => {
@@ -11,6 +12,9 @@ const ViewPointPage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const userId = localStorage.getItem("userID");
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchLocationDetails = async () => {
@@ -64,7 +68,7 @@ const ViewPointPage = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
-  const { name, description, locationImg, map } = location;
+  const { name, description, locationImg, map, locationScore } = location;
 
   return (
     <div className="bg-gradient-to-b from-gray-100 to-white font-kanit min-h-screen p-16">
@@ -123,8 +127,17 @@ const ViewPointPage = () => {
 
             {/* Rating Section */}
             <div className="flex items-center mb-6">
-              <span className="text-yellow-500 text-2xl">★★★★★</span>
-              <span className="text-gray-600 ml-3">(5.0 คะแนนยอดเยี่ยม)</span>
+              <span className="text-yellow-500 text-2xl">{[...Array(5)].map((_, i) => (
+            <span
+              key={i}
+              className={`text-yellow-500 ${
+                i < locationScore[0]?.score ? "opacity-100" : "opacity-30"
+              }`}
+            >
+              ★
+            </span>
+          ))}</span>
+              <span className="text-gray-600 ml-3">({locationScore[0]?.score || 0}.0)</span>
             </div>
 
             {/* Google Map */}
@@ -148,9 +161,11 @@ const ViewPointPage = () => {
                 ></iframe>
               </div>
             </div>
-          </div>
+          </div>  
         </div>
+        
       </div>
+      <Comments locationId={locationId} userId={userId} token={token} />
     </div>
   );
 };
