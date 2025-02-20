@@ -20,12 +20,14 @@ const ViewPointPageAdmin = () => {
     date: "",
     Images: [],
   });
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   useEffect(() => {
     const fetchLocationDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/location/${locationId}`
+          `${API_URL}/location/${locationId}`
         );
         if (!response.ok) throw new Error("Failed to fetch location details.");
 
@@ -74,7 +76,7 @@ const ViewPointPageAdmin = () => {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:8000/admin/location/${locationId}`,
+        `${API_URL}/admin/location/${locationId}`,
         {
           method: "PATCH",
           headers: {

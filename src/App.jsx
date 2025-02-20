@@ -80,8 +80,8 @@ const App = () => {
           <Route path="/attractionadmin" element={<AttractionAdmin/>} />
           <Route path="/cafepageadmin" element={<CafepageAdmin />} />
           <Route path="/staypageadmin" element={<StaypageAdmin />} />
-          <Route path="/cafeadmin" element={<CafeDetailAdmin />} />
-          <Route path="/stayadmin" element={<StayDetailAdmin />} />
+          <Route path="/cafeadmin/:locationId" element={<CafeDetailAdmin />} />
+          <Route path="/stayadmin/:locationId" element={<StayDetailAdmin />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/addlocationadmin" element={<AddLocationPageAdmin/>} />
           <Route path="/landing/:categoryId" element={<Landing/>} />

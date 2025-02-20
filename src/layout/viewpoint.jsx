@@ -12,6 +12,7 @@ const ViewPointPage = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const userId = localStorage.getItem("userID");
   const token = localStorage.getItem("token");
@@ -20,7 +21,7 @@ const ViewPointPage = () => {
     const fetchLocationDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/location/${locationId}`, // Use locationId in API endpoint
+          `${API_URL}/location/${locationId}`, // Use locationId in API endpoint
           {
             method: "GET",
             headers: {

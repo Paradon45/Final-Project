@@ -13,6 +13,8 @@ const Login = ({ isOpen, onClose, openRegister, setUserID }) => {
   const [successMessage, setSuccessMessage] = useState(false);
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   if (!isOpen) return null;
 
@@ -39,7 +41,7 @@ const Login = ({ isOpen, onClose, openRegister, setUserID }) => {
     setSuccessMessage(false);
 
     try {
-      const loginResponse = await fetch("http://localhost:8000/auth/login", {
+      const loginResponse = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -61,7 +63,7 @@ const Login = ({ isOpen, onClose, openRegister, setUserID }) => {
       const loginData = await loginResponse.json();
       localStorage.setItem("token", loginData.token);
 
-      const userResponse = await fetch("http://localhost:8000/user/me", {
+      const userResponse = await fetch(`${API_URL}/user/me`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

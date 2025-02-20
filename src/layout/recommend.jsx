@@ -8,6 +8,8 @@ const SearchSection = ({ onSearch }) => {
   const [budget, setBudget] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const { t } = useTranslation();
+  
+
 
   const handleSearch = () => {
     onSearch({ budget, categoryId });
@@ -88,18 +90,24 @@ const PlaceCard = ({ place, onAdd }) => {
 
 const SeeMorePage = () => {
   const { ToastComponent, showToast } = useToast();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
   const [filteredPlaces, setFilteredPlaces] = useState([]);
   const [selectedPlaces, setSelectedPlaces] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { t } = useTranslation();
+
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const handleSearch = async (filters) => {
     try {
-      const response = await fetch("http://localhost:8000/location/recommend", {
+      const response = await fetch(`${API_URL}/location/recommend`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -196,6 +204,13 @@ const SeeMorePage = () => {
         />
         <div className="mb-6 mt-4 w-11/12 h-1 rounded-lg bg-gray-300 mx-auto"></div>
       </div>
+      {!isAuthenticated && (
+        <div className="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-60 flex flex-col items-center justify-center">
+          <p className="animate-fadeIn font-kanit text-2xl font-bold text-red-600 bg-white p-4 rounded-md shadow-lg">
+            {t("please_login")}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

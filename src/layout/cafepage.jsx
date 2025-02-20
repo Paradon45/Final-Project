@@ -9,13 +9,14 @@ const Cafepage = () => {
   const [cafes, setCafes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     window.scrollTo(0, 0);
 
     const fetchCafes = async () => {
       try {
-        const response = await fetch("http://localhost:8000/location/landing");
+        const response = await fetch(`${API_URL}/location/landing`);
         if (!response.ok) {
           throw new Error("Failed to fetch cafes data.");
         }

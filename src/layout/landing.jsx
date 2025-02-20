@@ -11,6 +11,7 @@ const Landing = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const categories = [
     { id: "", name: t("all_locations") },
@@ -27,7 +28,7 @@ const Landing = () => {
 
     const fetchLocations = async () => {
       try {
-        const response = await fetch("http://localhost:8000/location/landing");
+        const response = await fetch(`${API_URL}/location/landing`);
         if (!response.ok) {
           throw new Error("Failed to fetch locations data.");
         }

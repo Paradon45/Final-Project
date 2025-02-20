@@ -116,6 +116,8 @@
     "medium" : "Medium",
     "high" : "High",
 
+    "please_login" : "Please log in to use this function.",
+
     "added_places" : "Add to travel plan",
     "no_added_places" : "No locations added.",
     "already_in_plan" : "This location has been added."

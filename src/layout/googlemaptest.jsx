@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import locations from "./testlocation.json";
+//import locations from "./testlocation.json";
+import { useLocation } from "react-router-dom";
 
 const GoogleMapTest = () => {
   const [map, setMap] = useState(null);
@@ -8,6 +9,46 @@ const GoogleMapTest = () => {
   const [directionsRenderer, setDirectionsRenderer] = useState(null);
   const [routes, setRoutes] = useState([]);
   const [currentPosition, setCurrentPosition] = useState(null);
+  const [locations, setLocations] = useState([]);
+  const [filteredLocations, setFilteredLocations] = useState([]);
+
+  const location = useLocation();
+  const { locationIds } = location.state || { locationIds: [] };
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await fetch(`${API_URL}/location/landing`);
+        const data = await response.json();
+
+        const locationsArray = Object.values(data.locations);
+
+        if (Array.isArray(locationsArray)) {
+          setLocations(locationsArray);
+
+          if (locationIds && Array.isArray(locationIds)) {
+            const filtered = locationsArray.filter((loc) =>
+              locationIds.includes(loc.locationId)
+            );
+            setFilteredLocations(filtered);
+          } else {
+            setFilteredLocations([]);
+          }
+        } else {
+          console.error("Data from API is not an object or cannot be converted to array:", data);
+          setFilteredLocations([]);
+        }
+      } catch (error) {
+        console.error("Error fetching locations:", error);
+        setFilteredLocations([]);
+      }
+    };
+
+    fetchLocations();
+  }, [locationIds]);
 
   useEffect(() => {
     const initMap = () => {
@@ -44,25 +85,25 @@ const GoogleMapTest = () => {
     loadGoogleMapsScript();
   }, []);
 
-  useEffect(() => {
-    if (map && locations.length > 0) {
-      // ลบ Marker เก่าทิ้ง
-      markers.forEach((marker) => marker.setMap(null));
-      setMarkers([]);
+ useEffect(() => {
+  if (map && filteredLocations.length > 0) {
+    // ลบ Marker เก่าทิ้ง
+    markers.forEach((marker) => marker.setMap(null));
+    setMarkers([]);
 
-      // สร้าง Marker สำหรับแต่ละสถานที่
-      const newMarkers = locations.map((loc) => {
-        return new window.google.maps.Marker({
-          position: { lat: loc.latitude, lng: loc.longitude },
-          map,
-          title: loc.name,
-          icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png", // ไอคอนปกติ
-        });
+    // สร้าง Marker สำหรับแต่ละสถานที่
+    const newMarkers = filteredLocations.map((loc) => {
+      return new window.google.maps.Marker({
+        position: { lat: loc.latitude, lng: loc.longitude },
+        map,
+        title: loc.name,
+        icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png", // ไอคอนปกติ
       });
+    });
 
-      setMarkers(newMarkers);
-    }
-  }, [map, locations]);
+    setMarkers(newMarkers);
+  }
+}, [map, filteredLocations]);
 
   useEffect(() => {
     if (map) {
@@ -72,23 +113,23 @@ const GoogleMapTest = () => {
   }, [map]);
 
   const calculateRoutes = () => {
-    if (!directionsService || !directionsRenderer || !currentPosition || locations.length < 1) {
+    if (!directionsService || !directionsRenderer || !currentPosition || filteredLocations.length < 1) {
       console.error("Directions service or renderer not initialized, or no current position.");
       return;
     }
-
+  
     // ลบ Marker ของแต่ละสถานที่
     markers.forEach((marker) => marker.setMap(null));
     setMarkers([]);
-
-    const waypoints = locations.slice(1).map((loc) => ({
+  
+    const waypoints = filteredLocations.slice(1).map((loc) => ({
       location: { lat: loc.latitude, lng: loc.longitude },
       stopover: true,
     }));
-
+  
     const origin = { lat: currentPosition.lat, lng: currentPosition.lng };
-    const destination = { lat: locations[0].latitude, lng: locations[0].longitude };
-
+    const destination = { lat: filteredLocations[0].latitude, lng: filteredLocations[0].longitude };
+  
     directionsService.route(
       {
         origin,
@@ -101,8 +142,6 @@ const GoogleMapTest = () => {
         if (status === window.google.maps.DirectionsStatus.OK) {
           setRoutes(response.routes);
           directionsRenderer.setDirections(response);
-
-          
         } else {
           console.error("Directions request failed due to", status);
         }
@@ -148,22 +187,33 @@ const GoogleMapTest = () => {
   };
 
   return (
-    <div>
-      <div id="map" style={{ width: "100%", height: "400px" }} />
-      <button
-        onClick={calculateRoutes}
-        style={{ marginTop: "10px", padding: "10px", backgroundColor: "blue", color: "white" }}
-      >
-        ค้นหาเส้นทาง
-      </button>
-      <button
-        onClick={getCurrentPosition}
-        style={{ marginTop: "10px", padding: "10px", backgroundColor: "green", color: "white" }}
-      >
-        ตำแหน่งปัจจุบัน
-      </button>
-      <RouteInfo routes={routes} />
-    </div>
+    <div className="font-kanit flex flex-col items-center">
+  <div id="map" style={{ width: "80%", height: "500px", margin: "0 auto",marginTop: "70px" }} />
+  
+  <div className="mt-4 flex gap-4">
+    <button
+      onClick={getCurrentPosition}
+      className="px-5 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
+    >
+      ตำแหน่งปัจจุบัน
+    </button>
+    
+    <button
+      onClick={calculateRoutes}
+      disabled={!currentPosition} // ปิดการใช้งานถ้ายังไม่มีตำแหน่งปัจจุบัน
+      className={`px-5 py-3 rounded-lg shadow-md transition ${
+        currentPosition
+          ? "bg-blue-600 text-white hover:bg-blue-700"
+          : "bg-gray-400 text-gray-200 cursor-not-allowed"
+      }`}
+    >
+      ค้นหาเส้นทาง
+    </button>
+  </div>
+
+  <RouteInfo routes={routes} />
+</div>
+
   );
 };
 
@@ -171,27 +221,28 @@ const RouteInfo = ({ routes }) => {
   if (!routes || routes.length === 0) return null;
 
   return (
-    <div style={{ marginTop: "20px" }}>
-      <h3>เส้นทางทั้งหมด</h3>
-      {routes.map((route, index) => (
-        <div key={index} style={{ marginBottom: "20px" }}>
-          <h4>เส้นทางที่ {index + 1}</h4>
-          {route.legs.map((leg, legIndex) => (
-            <div key={legIndex} style={{ marginBottom: "10px" }}>
-              <p>
-                <strong>จาก {leg.start_address} ไป {leg.end_address}</strong>
-              </p>
-              <p>ระยะทาง: {(leg.distance.value / 1000).toFixed(2)} กม.</p>
-              <p>เวลา: {(leg.duration.value / 60).toFixed(2)} นาที</p>
-            </div>
-          ))}
-          <p>
-            <strong>รวมระยะทาง:</strong> {route.legs.reduce((acc, leg) => acc + leg.distance.value, 0) / 1000} กม. |
-            <strong> รวมเวลา:</strong> {route.legs.reduce((acc, leg) => acc + leg.duration.value, 0) / 60} นาที
+    <div className="max-w-7xl mx-auto p-6 bg-gray-100 font-kanit mt-8">
+  <h3 className="text-lg font-semibold text-gray-800 mb-4">เส้นทางทั้งหมด</h3>
+
+  {routes.map((route, index) => (
+    <div key={index} className="mb-6 p-4 bg-gray-100 rounded-lg shadow">
+      {route.legs.map((leg, legIndex) => (
+        <div key={legIndex} className="mb-4 p-3 bg-white rounded-lg shadow-sm">
+          <p className="font-medium text-gray-700">
+            <strong>จาก {leg.start_address} ไป {leg.end_address}</strong>
           </p>
+          <p className="text-gray-600">🚗 ระยะทาง: {(leg.distance.value / 1000).toFixed(2)} กม.</p>
+          <p className="text-gray-600">⏳ เวลา: {(leg.duration.value / 60).toFixed(2)} นาที</p>
         </div>
       ))}
+      <p className="font-semibold text-gray-800">
+        <strong>รวมระยะทาง:</strong> {(route.legs.reduce((acc, leg) => acc + leg.distance.value, 0) / 1000).toFixed(2)} กม. |
+        <strong> รวมเวลา:</strong> {(route.legs.reduce((acc, leg) => acc + leg.duration.value, 0) / 60).toFixed(2)} นาที
+      </p>
     </div>
+  ))}
+</div>
+
   );
 };
 

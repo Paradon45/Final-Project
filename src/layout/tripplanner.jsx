@@ -9,7 +9,9 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 function TripPlanner() {
   const location = useLocation();
   const { locationIds } = location.state || {};
-  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   const [locations, setLocations] = useState([]);
   const [filteredLocations, setFilteredLocations] = useState([]);
@@ -17,7 +19,7 @@ function TripPlanner() {
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const response = await fetch("http://localhost:8000/location/landing");
+        const response = await fetch(`${API_URL}/location/landing`);
         const data = await response.json();
 
         // แปลงข้อมูลจาก object เป็น array
@@ -53,6 +55,8 @@ function TripPlanner() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
   }, []);
 
   const { ToastComponent, showToast } = useToast();
@@ -243,6 +247,13 @@ function TripPlanner() {
           {t("addday")}
         </button>
       </div>
+      {!isAuthenticated && (
+        <div className="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-60 flex flex-col items-center justify-center">
+          <p className="animate-fadeIn font-kanit text-2xl font-bold text-red-600 bg-white p-4 rounded-md shadow-lg">
+            {t("please_login")}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

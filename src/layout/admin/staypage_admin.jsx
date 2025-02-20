@@ -1,92 +1,121 @@
-import React, { useEffect } from "react";
-import image1 from "../../photo/1avani-khon-kaen-hotel.jpg";
-import image2 from "../../photo/96483612.jpg";
-import image3 from "../../photo/Inpawa-Hotel-Ban-Phai-Exterior.jpg";
+import React, { useEffect, useState } from "react";
 import { FaHotel } from "react-icons/fa";
+import { GiForkKnifeSpoon } from "react-icons/gi";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
-const StaypageAdmin = () => {
+const Cafepage = () => {
+  const { t } = useTranslation();
+  const [stays, setStays] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    const { t } = useTranslation();
-  
+  const API_URL = import.meta.env.VITE_API_URL;
+
+
   useEffect(() => {
-    // Reset to the top of the page instantly
     window.scrollTo(0, 0);
-  }, []);
 
-  const stays = [
-    {
-      image: image1,
-      alt: "AVANI Khon Kaen Hotel & Convention Centre",
-      title: "AVANI Khon Kaen Hotel & Convention Centre",
-      rating: "★★★★★",   
-      description: "ที่นี่คือที่พักขอนแก่นที่เหมาะกับการพักผ่อนในขอนแก่นสุด ๆ เพราะจะได้ทำให้คุณได้สัมผัสกับความสบาย",
-    },
-    {
-      image: image2,
-      alt: "Anchan Laguna Hotel Khonkaen",
-      title: "Anchan Laguna Hotel Khonkaen",
-      rating: "★★★★☆",
-      description: "เป็นโรงแรมขอนแก่นที่สร้างความอบอุ่นให้ผู้เข้าพัก ได้รู้สึกเหมือนได้อยู่บ้าน โดยจ่ายในราคาประหยัด",
-    },
-    {
-      image: image3,
-      alt: "อินภาวา บูติค โฮเต็ล (Inpawa Hotel)",
-      title: "อินภาวา บูติค โฮเต็ล (Inpawa Hotel)",
-      rating: "★★★★★",
-      description: "สัมผัสความเขียวขจีและความร่มรื่นได้ภายในโรงแรมขอนแก่นชื่อดังอีกหนึ่งที่ อย่าง อินภาวา บูติค โฮเต็ล ",
-    },
-  ];
+    const fetchstays = async () => {
+      try {
+        const response = await fetch(`${API_URL}/location/landing`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch stays data.");
+        }
+        const data = await response.json();
+
+        const filteredstays = data.locations.filter(
+          (location) => location.categoryId === 5
+        );
+        setStays(filteredstays);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchstays();
+  }, []);
 
   return (
     <div className="font-kanit bg-gradient-to-b from-gray-200 to-white animate-fadeIn max-w-7xl mx-auto p-8 md:p-16">
-      {/* Title Section */}
       <div className="text-center mb-10">
         <h2 className="text-4xl font-bold text-gray-800 mb-4 mt-5 flex justify-center items-center">
           {t("staypage")}
           <FaHotel className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
         </h2>
-        <div className="w-20 h-1 bg-orange-500 mx-auto"></div>
+        <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto rounded-lg"></div>
       </div>
 
-      {/* Stay Cards Grid */}
-      <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-8">
-        {stays.map((stay, index) => (
-          <div
-          key={index}
-          className={`relative bg-white border rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-2xl opacity-0 translate-y-10 delay-${
-            index * 200
-          } animate-fadeIn`}
-          style={{ animationDelay: `${index * 0.2}s` }}
-        >
-            {/* Image Section */}
-            <div className="relative group">
-              <img
-                src={stay.image}
-                alt={stay.alt}
-                className="w-full h-48 object-cover"
-              />
-              <Link to="/stayadmin" className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center text-white text-lg font-medium">
-                ดูเพิ่มเติม
-              </Link>
-            </div>
+      {loading && (
+        <p className="text-xl font-bold text-center">{t("loading")}</p>
+      )}
+      {error && (
+        <p className="text-xl font-bold text-center text-red-500">
+          {t("error_loading_data")}
+        </p>
+      )}
 
-            {/* Info Section */}
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-800 mt-2 ">
-                {stay.title}
-              </h3>
-              <span className="text-yellow-500 text-2xl">{stay.rating}</span>
-              <p className="text-gray-600 mt-3 text-sm leading-relaxed">
-                {stay.description}
-              </p>
+      {!loading && !error && (
+        <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-8">
+          {stays.map((stay, index) => (
+            <div
+              key={stay.locationId}
+              className={`relative bg-white border rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-2xl opacity-0 translate-y-10 delay-${
+                index * 200
+              } animate-fadeIn`}
+              style={{ animationDelay: `${index * 0.2}s` }}
+            >
+              <div className="relative group">
+                <img
+                  src={
+                    stay.locationImg[0]?.url ||
+                    "https://via.placeholder.com/300"
+                  }
+                  alt={stay.name}
+                  className="w-full h-48 object-cover"
+                />
+                <Link
+                  to={`/stayadmin/${stay.locationId}`}
+                  className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center text-white text-lg font-medium"
+                >
+                  {t("see_more")}
+                </Link>
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-800 mt-2">
+                  {stay.name}
+                </h3>
+                <span className="text-yellow-500 text-2xl">
+                  {[...Array(5)].map((_, i) => (
+                    <span
+                      key={i}
+                      className={`text-yellow-500 ${
+                        i < stay.locationScore[0]?.score
+                          ? "opacity-100"
+                          : "opacity-30"
+                      }`}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </span>
+                <span className="text-gray-600 ml-3">
+                  ({stay.locationScore[0]?.score || 0}.0)
+                </span>
+                <p className="text-gray-600 mt-3 text-sm leading-relaxed">
+                  {stay.description.length > 100
+                    ? `${stay.description.substring(0, 100)}...`
+                    : stay.description}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default StaypageAdmin;
+export default Cafepage;

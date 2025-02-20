@@ -22,6 +22,8 @@ const AddLocationPageAdmin = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [imagePreviews, setImagePreviews] = useState([]);
   const { t } = useTranslation();
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   useEffect(() => {
     return () => {
@@ -63,7 +65,7 @@ const AddLocationPageAdmin = () => {
         }
       });
 
-      const response = await fetch("http://localhost:8000/admin/location", {
+      const response = await fetch(`${API_URL}/admin/location`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

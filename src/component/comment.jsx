@@ -8,6 +8,8 @@ const Comments = ({ locationId, token, userId }) => {
   const [replyCommentId, setReplyCommentId] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [rating, setRating] = useState(0);
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   // ดึงข้อมูล comments
   useEffect(() => {
@@ -17,7 +19,7 @@ const Comments = ({ locationId, token, userId }) => {
   const fetchComments = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8000/location/${locationId}/comments`,
+        `${API_URL}/location/${locationId}/comments`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -45,7 +47,7 @@ const Comments = ({ locationId, token, userId }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/location/${locationId}/comment`,
+        `${API_URL}/location/${locationId}/comment`,
         {
           method: "POST",
           headers: {
@@ -69,7 +71,7 @@ const Comments = ({ locationId, token, userId }) => {
   const handleDeleteComment = async (commentId) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/location/comments/${commentId}`,
+        `${API_URL}/location/comments/${commentId}`,
         {
           method: "DELETE",
           headers: {
@@ -88,7 +90,7 @@ const Comments = ({ locationId, token, userId }) => {
   const handleEditComment = async (commentId) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/location/comments/${commentId}`,
+        `${API_URL}/location/comments/${commentId}`,
         {
           method: "PUT",
           headers: {
@@ -115,7 +117,7 @@ const Comments = ({ locationId, token, userId }) => {
     }
     try {
       const response = await fetch(
-        `http://localhost:8000/location/comments/${commentId}/reply`,
+        `${API_URL}/location/comments/${commentId}/reply`,
         {
           method: "POST",
           headers: {
@@ -136,9 +138,9 @@ const Comments = ({ locationId, token, userId }) => {
 
   return (
     <div className="mb-10 mt-6 max-w-6xl mx-auto p-4 bg-white shadow-md rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Comments</h2>
+      <h2 className="text-3xl font-semibold mb-4 ml-4">Comments</h2>
       {!token ? (
-        <p className="text-red-500">กรุณาเข้าสู่ระบบก่อน</p>
+        <p className="text-red-500 mb-6 text-xl font-semibold ml-2">** กรุณาเข้าสู่ระบบเพื่อคอมเมนต์ **</p>
       ) : (
         <div className="mb-4">
           <textarea

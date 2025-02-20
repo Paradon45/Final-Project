@@ -11,6 +11,7 @@ const Home = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [locations, setLocations] = useState([]);
   const {ToastComponent, showToast } = useToast();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -20,7 +21,7 @@ const Home = () => {
   // ดึงข้อมูลสถานที่ทั้งหมด
   const fetchLocations = async () => {
     try {
-      const response = await fetch("http://localhost:8000/location/landing");
+      const response = await fetch(`${API_URL}/location/landing`);
       if (!response.ok) throw new Error("Failed to fetch locations");
       const data = await response.json();
       setLocations(data.locations); // ✅ เก็บข้อมูลทั้งหมด
