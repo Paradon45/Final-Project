@@ -12,7 +12,7 @@ const Profile = () => {
   }, []);
 
   const user = {
-    name: "John Doe",
+    name: "Johnn Doe",
     email: "johndoe@example.com",
     profileImage: person,
     travelHistory: [
