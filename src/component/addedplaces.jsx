@@ -11,14 +11,45 @@ const AddedPlacesModal = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate(); // สร้าง instance ของ navigate
+  const API_URL = import.meta.env.VITE_API_URL;
+
 
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     const locationIds = selectedPlaces.map((place) => place.locationId);
-    console.log("Confirmed Locations:", locationIds);
-    // นำทางไปที่ /plans
-    navigate("/plans", { state: { locationIds } });
+    const selectedPlanId = localStorage.getItem("selectedPlanId");
+    const selectedPlanID = parseInt(selectedPlanId, 10);
+
+    if (!selectedPlanId) {
+      console.error("Plan ID not found");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/plan/plan-location`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          locationId: locationIds,
+          planId: selectedPlanID,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save the plan");
+      }
+
+      const data = await response.json();
+      console.log("Plan saved successfully", data);
+
+      // นำทางไปที่ /plans
+      navigate("/plans");
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   const handleRemove = (id) => {

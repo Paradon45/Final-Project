@@ -115,6 +115,7 @@
     "low" : "Low",
     "medium" : "Medium",
     "high" : "High",
+    "selected_plan" : "Plan name",
 
     "please_login" : "Please log in to use this function.",
 

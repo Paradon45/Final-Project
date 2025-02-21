@@ -3,13 +3,13 @@ import { useTranslation } from "react-i18next";
 import { FaMap } from "react-icons/fa";
 import { useToast } from "../component/ToastComponent";
 import AddedPlacesModal from "../component/addedplaces";
+import { FaPlus } from "react-icons/fa";
+import { map } from "framer-motion/client";
 
 const SearchSection = ({ onSearch }) => {
   const [budget, setBudget] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const { t } = useTranslation();
-  
-
 
   const handleSearch = () => {
     onSearch({ budget, categoryId });
@@ -96,6 +96,17 @@ const SeeMorePage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { t } = useTranslation();
 
+  const [plans, setPlans] = useState([]);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [showModal, setShowModal] = useState(true);
+  const [newPlanName, setNewPlanName] = useState("");
+  const [creatingNewPlan, setCreatingNewPlan] = useState(false);
+  const [newPlanDay, setNewPlanDay] = useState("");
+  const [selectedPlanName, setSelectedPlanName] = useState("");
+
+  const userId = localStorage.getItem("userID");
+
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -103,7 +114,76 @@ const SeeMorePage = () => {
     setIsAuthenticated(!!token);
   }, []);
 
-  const API_URL = import.meta.env.VITE_API_URL;
+  useEffect(() => {
+    if (selectedPlan) {
+      console.log("Selected Plan ID:", selectedPlan);
+      localStorage.setItem("selectedPlanId", selectedPlan); // เก็บไว้ใน LocalStorage
+    }
+  }, [selectedPlan]);
+
+  useEffect(() => {
+    if (selectedPlan) {
+      const selectedPlanData = plans.find(
+        (plan) => plan.planId === selectedPlan
+      ); // ค้นหาแผนจาก ID
+      if (selectedPlanData) {
+        setSelectedPlanName(selectedPlanData.name); // อัพเดตชื่อแผน
+      }
+    }
+  }, [selectedPlan, plans]);
+
+  useEffect(() => {
+    const fetchUserPlans = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`${API_URL}/user/${userId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // เพิ่ม Token เข้าไป
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setPlans(data.plan || []);
+      } catch (error) {
+        console.error("Error fetching user plans:", error);
+      }
+    };
+
+    if (userId) fetchUserPlans();
+  }, [userId]);
+
+  const createNewPlan = async () => {
+    if (!newPlanName.trim() || !newPlanDay.trim()) return;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/plan/createPlan/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: newPlanName, day: newPlanDay }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setPlans([...plans, data]); // เพิ่มแผนใหม่เข้าไป
+      setCreatingNewPlan(false); // กลับไปหน้าเลือกแผน
+      setNewPlanName(""); // เคลียร์ค่า input
+      setNewPlanDay("");
+    } catch (error) {
+      console.error("Error creating plan:", error);
+    }
+  };
 
   const handleSearch = async (filters) => {
     try {
@@ -142,9 +222,9 @@ const SeeMorePage = () => {
   };
 
   return (
-    <div>
+    <div className="font-kanit">
       {ToastComponent}
-      <div className="animate-fadeIn font-kanit p-8 bg-gradient-to-b from-gray-200 to-white min-h-screen md:p-16 max-w-7xl mx-auto">
+      <div className="animate-fadeIn  p-8 bg-gradient-to-b from-gray-200 to-white min-h-screen md:p-16 max-w-7xl mx-auto">
         <div className="text-center mb-11">
           <h2 className="text-4xl font-bold text-gray-800 mb-4 mt-5 flex justify-center items-center">
             {t("recommendpage")}
@@ -152,8 +232,15 @@ const SeeMorePage = () => {
           </h2>
           <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto mb-7 rounded-lg"></div>
           <SearchSection onSearch={handleSearch} />
+          {selectedPlanName && (
+            <div className="mt-5">
+              <h3 className="text-2xl font-bold">
+                {t("selected_plan")} : {selectedPlanName}
+              </h3>
+            </div>
+          )}
         </div>
-        <div className="relative w-full flex justify-end mt-3">
+        <div className="relative w-full flex justify-end mt-1">
           <div className="relative inline-block ">
             <button
               className="bg-green-500 text-white text-lg px-4 py-3 font-semibold rounded-md mb-4 hover:bg-green-600 duration-200 relative"
@@ -204,8 +291,69 @@ const SeeMorePage = () => {
         />
         <div className="mb-6 mt-4 w-11/12 h-1 rounded-lg bg-gray-300 mx-auto"></div>
       </div>
+
+      {showModal && (
+        <div className="animate-fadeIn fixed inset-0 bg-gray-800 bg-opacity-70 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h2 className="text-2xl font-bold mb-4">เลือกแผนการเดินทาง</h2>
+
+            {plans.length > 0 && !creatingNewPlan ? (
+              <div className="max-h-[400px] overflow-y-auto">
+                {plans.map((plan) => (
+                  <button
+                    key={plan.planId}
+                    className="block w-full bg-blue-500 text-white p-2 rounded mb-2"
+                    onClick={() => {
+                      setSelectedPlan(plan.planId);
+                      setShowModal(false);
+                    }}
+                  >
+                    {plan.name}
+                  </button>
+                ))}
+                <button
+                  className="bg-green-500 text-white px-4 py-2 rounded w-full mt-2 flex items-center justify-center"
+                  onClick={() => setCreatingNewPlan(true)}
+                >
+                  <FaPlus className="mr-2" /> เพิ่มแผนใหม่
+                </button>
+              </div>
+            ) : (
+              <div>
+                <input
+                  type="text"
+                  className="border p-2 w-full mb-2"
+                  placeholder="ตั้งชื่อแผน"
+                  value={newPlanName}
+                  onChange={(e) => setNewPlanName(e.target.value)}
+                />
+                <input
+                  type="text"
+                  className="border p-2 w-full mb-2"
+                  placeholder="วันที่ไป - กลับ"
+                  value={newPlanDay}
+                  onChange={(e) => setNewPlanDay(e.target.value)}
+                />
+                <button
+                  className="bg-green-500 text-white px-4 py-2 rounded w-full"
+                  onClick={createNewPlan}
+                >
+                  สร้างแผนใหม่
+                </button>
+                <button
+                  className="bg-gray-400 text-white px-4 py-2 rounded w-full mt-2"
+                  onClick={() => setCreatingNewPlan(false)}
+                >
+                  ย้อนกลับ
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {!isAuthenticated && (
-        <div className="absolute top-0 left-0 w-full h-full bg-gray-500 bg-opacity-60 flex flex-col items-center justify-center">
+        <div className="absolute top-0 left-0 w-full h-full bg-gray-800 bg-opacity-60 flex flex-col items-center justify-center">
           <p className="animate-fadeIn font-kanit text-2xl font-bold text-red-600 bg-white p-4 rounded-md shadow-lg">
             {t("please_login")}
           </p>
