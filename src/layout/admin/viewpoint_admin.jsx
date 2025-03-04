@@ -26,9 +26,7 @@ const ViewPointPageAdmin = () => {
   useEffect(() => {
     const fetchLocationDetails = async () => {
       try {
-        const response = await fetch(
-          `${API_URL}/location/${locationId}`
-        );
+        const response = await fetch(`${API_URL}/location/${locationId}`);
         if (!response.ok) throw new Error("Failed to fetch location details.");
 
         const data = await response.json();
@@ -75,17 +73,14 @@ const ViewPointPageAdmin = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch(
-        `${API_URL}/admin/location/${locationId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`${API_URL}/admin/location/${locationId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
 
       if (!response.ok) throw new Error("Failed to update location.");
 
@@ -243,6 +238,7 @@ const ViewPointPageAdmin = () => {
                   onChange={handleChange}
                   className="w-full p-2 border border-gray-300 rounded"
                 />
+
 
                 <button
                   onClick={handleUpdate}
