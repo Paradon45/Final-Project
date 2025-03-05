@@ -36,6 +36,14 @@ const Cafepage = () => {
     fetchCafes();
   }, []);
 
+  // ฟังก์ชันคำนวณคะแนนเฉลี่ย
+  const calculateAverageScore = (locationScore) => {
+    if (!locationScore || locationScore.length === 0) return 0;
+
+    const totalScore = locationScore.reduce((sum, score) => sum + score.score, 0);
+    return totalScore / locationScore.length;
+  };
+
   return (
     <div className="font-kanit bg-gradient-to-b from-gray-200 to-white animate-fadeIn max-w-7xl mx-auto p-8 md:p-16">
       <div className="text-center mb-10">
@@ -57,65 +65,67 @@ const Cafepage = () => {
 
       {!loading && !error && (
         <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-8">
-          {cafes.map((cafe, index) => (
-            <div
-              key={cafe.locationId}
-              className={`relative bg-white border rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-2xl opacity-0 translate-y-10 delay-${
-                index * 200
-              } animate-fadeIn`}
-              style={{ animationDelay: `${index * 0.2}s` }}
-            >
-              <div className="relative group">
-                <img
-                  src={
-                    cafe.locationImg[0]?.url ||
-                    "https://via.placeholder.com/300"
-                  }
-                  alt={cafe.name}
-                  className="w-full h-48 object-cover"
-                />
-                <Link
-                  to={`/cafes/${cafe.locationId}`}
-                  className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center text-white text-lg font-medium"
-                >
-                  {t("see_more")}
-                </Link>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                    {t("cafepage")}
-                  </span>
-                  <GiForkKnifeSpoon className="text-gray-500 text-2xl" />
+          {cafes.map((cafe, index) => {
+            const averageScore = calculateAverageScore(cafe.locationScore); // คำนวณคะแนนเฉลี่ย
+
+            return (
+              <div
+                key={cafe.locationId}
+                className={`relative bg-white border rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-2xl opacity-0 translate-y-10 delay-${
+                  index * 200
+                } animate-fadeIn`}
+                style={{ animationDelay: `${index * 0.2}s` }}
+              >
+                <div className="relative group">
+                  <img
+                    src={
+                      cafe.locationImg[0]?.url ||
+                      "https://via.placeholder.com/300"
+                    }
+                    alt={cafe.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <Link
+                    to={`/cafes/${cafe.locationId}`}
+                    className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center text-white text-lg font-medium"
+                  >
+                    {t("see_more")}
+                  </Link>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mt-2">
-                  {cafe.name}
-                </h3>
-                <span className="text-yellow-500 text-2xl">
-                  {[...Array(5)].map((_, i) => (
-                    <span
-                      key={i}
-                      className={`text-yellow-500 ${
-                        i < cafe.locationScore[0]?.score
-                          ? "opacity-100"
-                          : "opacity-30"
-                      }`}
-                    >
-                      ★
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                      {t("cafepage")}
                     </span>
-                  ))}
-                </span>
-                <span className="text-gray-600 ml-3">
-                  ({cafe.locationScore[0]?.score || 0}.0)
-                </span>
-                <p className="text-gray-600 mt-3 text-sm leading-relaxed">
-                  {cafe.description.length > 100
-                    ? `${cafe.description.substring(0, 100)}...`
-                    : cafe.description}
-                </p>
+                    <GiForkKnifeSpoon className="text-gray-500 text-2xl" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 mt-2">
+                    {cafe.name}
+                  </h3>
+                  <span className="text-yellow-500 text-2xl">
+                    {[...Array(5)].map((_, i) => (
+                      <span
+                        key={i}
+                        className={`text-yellow-500 ${
+                          i < averageScore ? "opacity-100" : "opacity-30"
+                        }`}
+                      >
+                        ★
+                      </span>
+                    ))}
+                  </span>
+                  <span className="text-gray-600 ml-3">
+                    ({averageScore.toFixed(1)}) {/* แสดงคะแนนเฉลี่ยทศนิยม 1 ตำแหน่ง */}
+                  </span>
+                  <p className="text-gray-600 mt-3 text-sm leading-relaxed">
+                    {cafe.description.length > 100
+                      ? `${cafe.description.substring(0, 100)}...`
+                      : cafe.description}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

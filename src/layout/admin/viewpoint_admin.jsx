@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const ViewPointPageAdmin = () => {
@@ -20,8 +20,10 @@ const ViewPointPageAdmin = () => {
     date: "",
     Images: [],
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [newImages, setNewImages] = useState([]); // State สำหรับเก็บรูปภาพใหม่
   const API_URL = import.meta.env.VITE_API_URL;
-
 
   useEffect(() => {
     const fetchLocationDetails = async () => {
@@ -69,17 +71,37 @@ const ViewPointPageAdmin = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleImageChange = (e) => {
+    setNewImages([...e.target.files]); // เก็บไฟล์รูปภาพที่ผู้ใช้เลือก
+  };
+
   const handleUpdate = async () => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+    setError(null);
+    setIsSuccess(false);
+
     try {
       const token = localStorage.getItem("token");
+      const formDataToSend = new FormData();
+
+      // เพิ่มข้อมูลฟอร์มลงใน FormData
+      Object.keys(formData).forEach((key) => {
+        formDataToSend.append(key, formData[key]);
+      });
+
+      // เพิ่มรูปภาพใหม่ลงใน FormData
+      newImages.forEach((image) => {
+        formDataToSend.append("Images", image); // ใช้ "Images" เพื่อให้ตรงกับ API
+      });
 
       const response = await fetch(`${API_URL}/admin/location/${locationId}`, {
         method: "PATCH",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: formDataToSend, // ส่ง FormData แทน JSON
       });
 
       if (!response.ok) throw new Error("Failed to update location.");
@@ -87,9 +109,13 @@ const ViewPointPageAdmin = () => {
       const updatedData = await response.json();
       setLocation(updatedData.location);
       setEditMode(false);
-      window.location.reload();
+      setNewImages([]); // ล้างรูปภาพใหม่หลังจากอัปเดตเสร็จ
+      setIsSuccess(true);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setIsLoading(false);
+      window.location.reload();
     }
   };
 
@@ -98,6 +124,37 @@ const ViewPointPageAdmin = () => {
 
   return (
     <div className="bg-gradient-to-b from-gray-100 to-white font-kanit min-h-screen p-16">
+      {/* Loading/Success Modal */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded shadow-lg text-center">
+            {isSuccess ? (
+              <div>
+                <h1 className="text-2xl font-bold mb-4 text-green-600">
+                  อัปเดตสำเร็จ!
+                </h1>
+                <div className="text-green-600 text-6xl">✔</div>
+              </div>
+            ) : error ? (
+              <div>
+                <h1 className="text-2xl font-bold mb-4 text-red-600">
+                  อัปเดตไม่สำเร็จ!
+                </h1>
+                <div className="text-red-600 text-6xl">✖</div>
+                <p className="text-gray-700 mt-2">{error}</p>
+              </div>
+            ) : (
+              <div>
+                <h1 className="text-2xl font-bold mb-4 text-center">
+                  {t("loading")}
+                </h1>
+                <div className="loader w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="animate-fadeInDelay2 text-center mb-8 mt-4">
         <h1 className="text-5xl font-bold text-gray-800 mb-4">
@@ -239,6 +296,17 @@ const ViewPointPageAdmin = () => {
                   className="w-full p-2 border border-gray-300 rounded"
                 />
 
+                {/* Input สำหรับอัปโหลดรูปภาพใหม่ */}
+                <label className="block font-bold mt-4 mb-2">
+                  {t("photo")}
+                </label>
+                <input
+                  type="file"
+                  name="images"
+                  multiple
+                  onChange={handleImageChange}
+                  className="w-full p-2 border border-gray-300 rounded"
+                />
 
                 <button
                   onClick={handleUpdate}

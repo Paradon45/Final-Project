@@ -69,7 +69,15 @@ const ViewPointPage = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
+  const calculateAverageScore = (locationScore) => {
+    if (!locationScore || locationScore.length === 0) return 0;
+
+    const totalScore = locationScore.reduce((sum, score) => sum + score.score, 0);
+    return totalScore / locationScore.length;
+  };
+
   const { name, description, locationImg, map, locationScore } = location;
+  const averageScore = calculateAverageScore(locationScore);
 
   return (
     <div className="bg-gradient-to-b from-gray-100 to-white font-kanit min-h-screen p-16">
@@ -132,13 +140,13 @@ const ViewPointPage = () => {
             <span
               key={i}
               className={`text-yellow-500 ${
-                i < locationScore[0]?.score ? "opacity-100" : "opacity-30"
+                i < averageScore ? "opacity-100" : "opacity-30"
               }`}
             >
               ★
             </span>
           ))}</span>
-              <span className="text-gray-600 ml-3">({locationScore[0]?.score || 0}.0)</span>
+              <span className="text-gray-600 ml-3">({averageScore.toFixed(1) || 0})</span>
             </div>
 
             {/* Google Map */}

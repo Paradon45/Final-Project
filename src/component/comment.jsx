@@ -311,8 +311,16 @@ const Comments = ({ locationId, token, userId }) => {
                       setEditingCommentId(comment.commentId);
                       setEditCommentText(comment.text);
                     }}
+                    disabled={isDeleting}
                   >
-                    Edit
+                    {isDeleting ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span className="ml-2">Deleting...</span>
+                      </div>
+                    ) : (
+                      "Edit"
+                    )}
                   </button>
                   <button
                     className="bg-red-500 text-white px-3 py-1 rounded-md"
