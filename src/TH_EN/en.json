@@ -121,6 +121,8 @@
 
     "added_places" : "Add to travel plan",
     "no_added_places" : "No locations added.",
-    "already_in_plan" : "This location has been added."
+    "already_in_plan" : "This location has been added.",
+
+    "plan_deleted_successfully": "Plan deleted successfully!"
   }
   

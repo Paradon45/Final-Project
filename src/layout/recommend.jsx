@@ -4,7 +4,8 @@ import { FaMap } from "react-icons/fa";
 import { useToast } from "../component/ToastComponent";
 import AddedPlacesModal from "../component/addedplaces";
 import { FaPlus } from "react-icons/fa";
-import { map } from "framer-motion/client";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaTrash } from "react-icons/fa";
 
 const SearchSection = ({ onSearch }) => {
   const [budget, setBudget] = useState("");
@@ -180,8 +181,35 @@ const SeeMorePage = () => {
       setCreatingNewPlan(false); // กลับไปหน้าเลือกแผน
       setNewPlanName(""); // เคลียร์ค่า input
       setNewPlanDay("");
+      window.location.reload();
     } catch (error) {
       console.error("Error creating plan:", error);
+    }
+  };
+
+  const deletePlan = async (planId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${API_URL}/plan/${planId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      // ลบแผนออกจาก state
+      setPlans((prevPlans) =>
+        prevPlans.filter((plan) => plan.planId !== planId)
+      );
+      showToast(t("plan_deleted_successfully")); // แสดงข้อความสำเร็จ
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      showToast(t("unknown_error")); // แสดงข้อความผิดพลาด
     }
   };
 
@@ -299,18 +327,35 @@ const SeeMorePage = () => {
 
             {plans.length > 0 && !creatingNewPlan ? (
               <div className="max-h-[400px] overflow-y-auto">
-                {plans.map((plan) => (
-                  <button
-                    key={plan.planId}
-                    className="block w-full bg-blue-500 text-white p-2 rounded mb-2"
-                    onClick={() => {
-                      setSelectedPlan(plan.planId);
-                      setShowModal(false);
-                    }}
-                  >
-                    {plan.name}
-                  </button>
-                ))}
+                <div className="space-y-2">
+                  <AnimatePresence>
+                    {plans.map((plan) => (
+                      <motion.div
+                        key={plan.planId}
+                        initial={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -100 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex items-center justify-between space-x-2"
+                      >
+                        <button
+                          className="flex-1 bg-blue-500 text-white p-2 rounded text-left whitespace-normal break-words hover:bg-blue-600 duration-200"
+                          onClick={() => {
+                            setSelectedPlan(plan.planId);
+                            setShowModal(false);
+                          }}
+                        >
+                          {plan.name}
+                        </button>
+                        <button
+                          className="bg-red-500 text-white p-2 rounded hover:bg-red-600 duration-200 flex items-center justify-center"
+                          onClick={() => deletePlan(plan.planId)}
+                        >
+                          <FaTrash className="text-lg" />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
                 <button
                   className="bg-green-500 text-white px-4 py-2 rounded w-full mt-2 flex items-center justify-center"
                   onClick={() => setCreatingNewPlan(true)}
