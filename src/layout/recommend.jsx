@@ -130,6 +130,7 @@ const SeeMorePage = () => {
     if (userId) fetchUserPlans();
   }, [userId]);
 
+  // ฟังก์ชันดึงข้อมูลสถานที่ทั้งหมด
   const fetchAllPlaces = async () => {
     try {
       const response = await fetch(`${API_URL}/location/landing`, {
@@ -144,8 +145,12 @@ const SeeMorePage = () => {
       }
 
       const data = await response.json();
-      setAllPlaces(data.locations);
-      setFilteredPlaces(data.locations);
+      // กรองสถานที่ที่มี categoryId = 5 ออก
+      const filteredData = data.locations.filter(
+        (place) => place.category.categoryId !== 5
+      );
+      setAllPlaces(filteredData);
+      setFilteredPlaces(filteredData);
     } catch (error) {
       console.error("Error fetching all places:", error);
       showToast(t("fetch_error"));
@@ -156,10 +161,11 @@ const SeeMorePage = () => {
     fetchAllPlaces();
   }, []);
 
+  // ฟังก์ชันกรองสถานที่ตามประเภท
   const handleFilter = (categoryId) => {
     setSelectedCategory(categoryId);
     if (categoryId === "") {
-      setFilteredPlaces(allPlaces);
+      setFilteredPlaces(allPlaces); // ถ้าไม่เลือกประเภท ให้แสดงทั้งหมด (ไม่รวม categoryId = 5)
     } else {
       const filtered = allPlaces.filter(
         (place) => place.category.categoryId === parseInt(categoryId, 10)
@@ -270,7 +276,6 @@ const SeeMorePage = () => {
             <option value="2">{t("temples")}</option>
             <option value="3">{t("markets")}</option>
             <option value="4">{t("cafepage")}</option>
-            <option value="5">{t("staypage")}</option>
             <option value="6">{t("others")}</option>
           </select>
         </div>
