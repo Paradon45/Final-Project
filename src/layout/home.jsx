@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../component/ToastComponent";
 import myImage from "../photo/20180328812f8494092d52cc3373d93baeb9e966115448.jpg";
+import { FaMap } from "react-icons/fa";
+import AddedPlacesModal from "../component/addedplaces";
 
 const Home = () => {
   const { t } = useTranslation();
@@ -10,7 +12,10 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [locations, setLocations] = useState([]);
-  const {ToastComponent, showToast } = useToast();
+  const { ToastComponent, showToast } = useToast();
+  const [selectedPlaces, setSelectedPlaces] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
@@ -134,6 +139,23 @@ const Home = () => {
           </div>
         </div>
       </header>
+      <AddedPlacesModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          selectedPlaces={selectedPlaces}
+          setSelectedPlaces={setSelectedPlaces}
+        />
+      <button
+        className="fixed bottom-8 right-8 bg-green-500 text-white p-6 rounded-full shadow-lg hover:bg-green-600 duration-200 animate-bounce z-[1000]"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <FaMap className="text-2xl" />
+        {selectedPlaces.length > 0 && (
+          <span className="absolute -top-2 -right-0 bg-red-500 text-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center">
+            {selectedPlaces.length}
+          </span>
+        )}
+      </button>
     </div>
   );
 };

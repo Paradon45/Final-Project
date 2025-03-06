@@ -288,23 +288,22 @@ const SeeMorePage = () => {
             </div>
           </div>
         )}
-        <AddedPlacesModal
+        <div className="mb-6 mt-4 w-11/12 h-1 rounded-lg bg-gray-300 mx-auto"></div>
+      </div>
+
+      <AddedPlacesModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           selectedPlaces={selectedPlaces}
           setSelectedPlaces={setSelectedPlaces}
         />
-        <div className="mb-6 mt-4 w-11/12 h-1 rounded-lg bg-gray-300 mx-auto"></div>
-      </div>
-
-      {/* ปุ่มกลมๆ ลอยอยู่ */}
       <button
-        className="fixed bottom-8 right-8 bg-green-500 text-white p-6 rounded-full shadow-lg hover:bg-green-600 duration-200 animate-bounce"
+        className="fixed bottom-8 right-8 bg-green-500 text-white p-6 rounded-full shadow-lg hover:bg-green-600 duration-200 animate-bounce z-[1000]"
         onClick={() => setIsModalOpen(true)}
       >
         <FaMap className="text-2xl" />
         {selectedPlaces.length > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center">
+          <span className="absolute -top-2 -right-0 bg-red-500 text-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center">
             {selectedPlaces.length}
           </span>
         )}

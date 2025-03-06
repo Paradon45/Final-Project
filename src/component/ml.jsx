@@ -136,7 +136,7 @@ const ML = ({ isOpen, onClose }) => {
       placement="left" // เปลี่ยนจาก "right" เป็น "left"
       onClose={onClose}
       className="font-kanit"
-      visible={isOpen}
+      open={isOpen}
       width={800}
       footer={
         <div className="flex justify-end">

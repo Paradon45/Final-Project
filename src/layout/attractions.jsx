@@ -2,12 +2,16 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import templeImage from "../photo/location-2.jpg";
+import AddedPlacesModal from "../component/addedplaces";
+import { FaMap } from "react-icons/fa";
 
 const Attractions = () => {
   const { t } = useTranslation();
   const [groupedAttractions, setGroupedAttractions] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedPlaces, setSelectedPlaces] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
@@ -71,14 +75,14 @@ const Attractions = () => {
 
       <section className="bg-white py-12">
         <div className="container mx-auto px-4">
-        {!loading && !error && (
-          <Link to={`/landing`}>
-            <div className="text-right mr-6">
-              <button className="px-4 py-2 bg-gray-300 hover:bg-yellow-500 transition duration-300 text-gray-800 font-semibold rounded shadow animate-fadeIn3Delay1">
-                {t("locations")}
-              </button>
-            </div>
-          </Link>
+          {!loading && !error && (
+            <Link to={`/landing`}>
+              <div className="text-right mr-6">
+                <button className="px-4 py-2 bg-gray-300 hover:bg-yellow-500 transition duration-300 text-gray-800 font-semibold rounded shadow animate-fadeIn3Delay1">
+                  {t("locations")}
+                </button>
+              </div>
+            </Link>
           )}
           {loading && (
             <p className="text-xl font-bold text-center">{t("loading")}</p>
@@ -147,6 +151,23 @@ const Attractions = () => {
           )}
         </div>
       </section>
+      <AddedPlacesModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          selectedPlaces={selectedPlaces}
+          setSelectedPlaces={setSelectedPlaces}
+        />
+      <button
+        className="fixed bottom-8 right-8 bg-green-500 text-white p-6 rounded-full shadow-lg hover:bg-green-600 duration-200 animate-bounce z-[1000]"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <FaMap className="text-2xl" />
+        {selectedPlaces.length > 0 && (
+          <span className="absolute -top-2 -right-0 bg-red-500 text-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center">
+            {selectedPlaces.length}
+          </span>
+        )}
+      </button>
     </div>
   );
 };

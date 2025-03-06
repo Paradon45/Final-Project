@@ -120,7 +120,7 @@
     "please_login" : "Please log in to use this function.",
 
     "added_places" : "Add to travel plan",
-    "no_added_places" : "No locations added.",
+    "no_added_places" : "No locations added, Please use the menu 'recommendation'",
     "already_in_plan" : "This location has been added.",
 
     "plan_deleted_successfully": "Plan deleted successfully!",
