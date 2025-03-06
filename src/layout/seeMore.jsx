@@ -3,7 +3,6 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FaEye } from "react-icons/fa";
 
-
 const SeeMore = () => {
   const { categoryId } = useParams();
   const { t } = useTranslation();
@@ -13,7 +12,6 @@ const SeeMore = () => {
   const [error, setError] = useState(null);
 
   const API_URL = import.meta.env.VITE_API_URL;
-
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -42,17 +40,27 @@ const SeeMore = () => {
     fetchLocations();
   }, [categoryId]);
 
+  const calculateAverageScore = (locationScore) => {
+    if (!locationScore || locationScore.length === 0) return 0;
+
+    const totalScore = locationScore.reduce(
+      (sum, score) => sum + score.score,
+      0
+    );
+    return totalScore / locationScore.length;
+  };
+
   return (
     <div className="font-kanit bg-gradient-to-b from-gray-200 to-gray-100 animate-fadeIn max-w-7xl mx-auto p-8 md:p-16">
       {/* Header */}
       <header className="text-center mb-4 py-6">
         <div className="container mx-auto px-4">
-          <h1 className="text-5xl font-bold text-gray-800 mb-4 flex justify-center items-center gap-2" >
+          <h1 className="text-5xl font-bold text-gray-800 mb-4 flex justify-center items-center gap-2">
             {t("see_more")}
             <FaEye className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
           </h1>
           <h1 className="text-2xl font-bold text-gray-600 mb-4 flex justify-center items-center">
-          {t("category")} : {locations[0]?.category?.name || t("loading")}
+            {t("category")} : {locations[0]?.category?.name || t("loading")}
           </h1>
           <div className="w-36 h-1 bg-orange-500 mx-auto"></div>
         </div>
@@ -84,43 +92,63 @@ const SeeMore = () => {
               ) : (
                 <div
                   className="overflow-y-auto max-h-[500px] space-y-6 p-7 border border-gray-200 rounded-lg shadow-inner"
-                  style={{ scrollbarWidth: "thin", scrollbarColor: "#cbd5e0 #f7fafc" }}
+                  style={{
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "#cbd5e0 #f7fafc",
+                  }}
                 >
-                  {locations.map((location) => (
-                     <Link
-                     to={`/viewpoint/${location.locationId}`}
-                     
-                   >
-                    <div
-                      key={location.locationId}
-                      className="mb-4 flex items-center bg-gray-100 rounded-lg shadow-md p-4 hover:shadow-lg transform transition duration-200 hover:scale-105"
-                    >
-                      {/* Image */}
-                      <img
-                        src={location.locationImg[0]?.url || "/placeholder.jpg"}
-                        alt={location.name}
-                        className="w-32 h-32 object-cover rounded-lg mr-4"
-                      />
-                      {/* Details */}
-                      <div className="flex-grow">
+                  {locations.map((location) => {
+                    const averageScore = calculateAverageScore(
+                      location.locationScore
+                    );
+
+                    return (
+                      <Link to={`/viewpoint/${location.locationId}`}>
                         <div
-                          className="text-xl font-bold text-red-600 "
+                          key={location.locationId}
+                          className="mb-4 flex items-center bg-gray-100 rounded-lg shadow-md p-4 hover:shadow-lg transform transition duration-200 hover:scale-105"
                         >
-                          {location.name}
+                          {/* Image */}
+                          <img
+                            src={
+                              location.locationImg[0]?.url || "/placeholder.jpg"
+                            }
+                            alt={location.name}
+                            className="w-32 h-32 object-cover rounded-lg mr-4"
+                          />
+                          {/* Details */}
+                          <div className="flex-grow">
+                            <div className="text-xl font-bold text-red-600 ">
+                              {location.name}
+                            </div>
+                            <p className="text-gray-600 mt-2 line-clamp-2">
+                              {location.description}
+                            </p>
+                            <div className="flex items-center mt-2">
+                              <span className="text-yellow-500 text-2xl">
+                                {[...Array(5)].map((_, i) => (
+                                  <span
+                                    key={i}
+                                    className={`text-yellow-500 ${
+                                      i < averageScore
+                                        ? "opacity-100"
+                                        : "opacity-30"
+                                    }`}
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </span>
+                              <span className="text-gray-600 ml-3">
+                                ({averageScore.toFixed(1)}){" "}
+                                {/* แสดงคะแนนเฉลี่ยทศนิยม 1 ตำแหน่ง */}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <p className="text-gray-600 mt-2 line-clamp-2">
-                          {location.description}
-                        </p>
-                        <div className="flex items-center mt-2">
-                          <span className="text-yellow-500">★★★★☆</span>
-                          <span className="text-gray-600 ml-2">
-                            ({location.rating || "4.0"})
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </>

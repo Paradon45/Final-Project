@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.custom-checkbox .ant-checkbox-inner {
+    border-width: 2px; /* ปรับความหนาของเส้นขอบ */
+    border-color: #b5b9b5; /* ปรับสีเส้นขอบ */
+  }
+  
+  .custom-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+    border-width: 2px; /* ปรับความหนาของเส้นขอบเมื่อถูกเลือก */
+    border-color: #1c2bfe; /* ปรับสีเส้นขอบเมื่อถูกเลือก */
+  }

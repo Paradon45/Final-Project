@@ -61,6 +61,16 @@ const Landing = () => {
     filterByCategory();
   }, [locations, categoryId, searchQuery]);
 
+  const calculateAverageScore = (locationScore) => {
+    if (!locationScore || locationScore.length === 0) return 0;
+
+    const totalScore = locationScore.reduce(
+      (sum, score) => sum + score.score,
+      0
+    );
+    return totalScore / locationScore.length;
+  };
+
   return (
     <div className="font-kanit bg-gradient-to-b from-gray-200 to-gray-100 animate-fadeIn max-w-7xl mx-auto p-8 md:p-16">
       {/* Header */}
@@ -131,51 +141,56 @@ const Landing = () => {
                     scrollbarColor: "#cbd5e0 #f7fafc",
                   }}
                 >
-                  {filteredLocations.map((location) => (
-                    <Link
-                      to={`/viewpoint/${location.locationId}`}
-                      key={location.locationId}
-                    >
-                      <div className="mb-4 flex items-center bg-gray-100 rounded-lg shadow-md p-4 hover:shadow-lg transform transition duration-200 hover:scale-105">
-                        {/* Image */}
-                        <img
-                          src={
-                            location.locationImg[0]?.url || "/placeholder.jpg"
-                          }
-                          alt={location.name}
-                          className="w-32 h-32 object-cover rounded-lg mr-4"
-                        />
-                        {/* Details */}
-                        <div className="flex-grow">
-                          <div className="text-xl font-bold text-red-600">
-                            {location.name}
-                          </div>
-                          <p className="text-gray-600 mt-2 mr-2 line-clamp-2">
-                            {location.description}
-                          </p>
-                          <div className="flex items-center mt-2">
-                            <span className="text-yellow-500 text-xl">
-                              {[...Array(5)].map((_, i) => (
-                                <span
-                                  key={i}
-                                  className={`text-yellow-500 ${
-                                    i < location.locationScore[0]?.score
-                                      ? "opacity-100"
-                                      : "opacity-30"
-                                  }`}
-                                >
-                                  ★
-                                </span>
-                              ))}
-                            </span>
-                            <span className="text-gray-600 ml-3">
-                              ({location.locationScore[0]?.score || 0}.0)
-                            </span>
+                  {filteredLocations.map((location) => {
+                    const averageScore = calculateAverageScore(
+                      location.locationScore
+                    );
+                    return (
+                      <Link
+                        to={`/viewpoint/${location.locationId}`}
+                        key={location.locationId}
+                      >
+                        <div className="mb-4 flex items-center bg-gray-100 rounded-lg shadow-md p-4 hover:shadow-lg transform transition duration-200 hover:scale-105">
+                          {/* Image */}
+                          <img
+                            src={
+                              location.locationImg[0]?.url || "/placeholder.jpg"
+                            }
+                            alt={location.name}
+                            className="w-32 h-32 object-cover rounded-lg mr-4"
+                          />
+                          {/* Details */}
+                          <div className="flex-grow">
+                            <div className="text-xl font-bold text-red-600">
+                              {location.name}
+                            </div>
+                            <p className="text-gray-600 mt-2 mr-2 line-clamp-2">
+                              {location.description}
+                            </p>
+                            <div className="flex items-center mt-2">
+                              <span className="text-yellow-500 text-xl">
+                                {[...Array(5)].map((_, i) => (
+                                  <span
+                                    key={i}
+                                    className={`text-yellow-500 ${
+                                      i < averageScore
+                                        ? "opacity-100"
+                                        : "opacity-30"
+                                    }`}
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </span>
+                              <span className="text-gray-600 ml-3">
+                                ({averageScore.toFixed(1) || 0})
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </>

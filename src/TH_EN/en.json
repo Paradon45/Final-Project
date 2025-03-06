@@ -123,6 +123,7 @@
     "no_added_places" : "No locations added.",
     "already_in_plan" : "This location has been added.",
 
-    "plan_deleted_successfully": "Plan deleted successfully!"
+    "plan_deleted_successfully": "Plan deleted successfully!",
+    "total_price": "Total Price"
   }
   

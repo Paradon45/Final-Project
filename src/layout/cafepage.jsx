@@ -107,7 +107,7 @@ const Cafepage = () => {
                       <span
                         key={i}
                         className={`text-yellow-500 ${
-                          i < averageScore ? "opacity-100" : "opacity-30"
+                          i < cafe.averageScore ? "opacity-100" : "opacity-30"
                         }`}
                       >
                         ★

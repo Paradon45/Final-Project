@@ -122,7 +122,9 @@
     "no_added_places" : "ไม่มีสถานที่ที่เพิ่มเข้ามา",
     "already_in_plan" : "สถานที่นี้ถูกเพิ่มแล้ว",
 
-    "plan_deleted_successfully": "ลบแพลนสำเร็จ!"
+    "plan_deleted_successfully": "ลบแพลนสำเร็จ!",
+    "total_price": "ค่าใช้จ่ายโดยประมาณ"
+    
     
     
   }

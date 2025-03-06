@@ -12,7 +12,6 @@ const Cafepage = () => {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-
   useEffect(() => {
     window.scrollTo(0, 0);
 
@@ -38,6 +37,16 @@ const Cafepage = () => {
     fetchstays();
   }, []);
 
+  const calculateAverageScore = (locationScore) => {
+    if (!locationScore || locationScore.length === 0) return 0;
+
+    const totalScore = locationScore.reduce(
+      (sum, score) => sum + score.score,
+      0
+    );
+    return totalScore / locationScore.length;
+  };
+
   return (
     <div className="font-kanit bg-gradient-to-b from-gray-200 to-white animate-fadeIn max-w-7xl mx-auto p-8 md:p-16">
       <div className="text-center mb-10">
@@ -59,7 +68,10 @@ const Cafepage = () => {
 
       {!loading && !error && (
         <div className="grid md:grid-cols-3 sm:grid-cols-2 gap-8">
-          {stays.map((stay, index) => (
+          {stays.map((stay, index) => {
+            const averageScore = calculateAverageScore(stay.locationScore);
+
+            return (
             <div
               key={stay.locationId}
               className={`relative bg-white border rounded-lg shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-2xl opacity-0 translate-y-10 delay-${
@@ -92,9 +104,7 @@ const Cafepage = () => {
                     <span
                       key={i}
                       className={`text-yellow-500 ${
-                        i < stay.locationScore[0]?.score
-                          ? "opacity-100"
-                          : "opacity-30"
+                        i < averageScore ? "opacity-100" : "opacity-30"
                       }`}
                     >
                       ★
@@ -102,7 +112,7 @@ const Cafepage = () => {
                   ))}
                 </span>
                 <span className="text-gray-600 ml-3">
-                  ({stay.locationScore[0]?.score || 0}.0)
+                  ({averageScore.toFixed(1) || 0})
                 </span>
                 <p className="text-gray-600 mt-3 text-sm leading-relaxed">
                   {stay.description.length > 100
@@ -111,7 +121,8 @@ const Cafepage = () => {
                 </p>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

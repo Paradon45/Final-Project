@@ -1,58 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FaMap } from "react-icons/fa";
+import { FaMap, FaPlus, FaTrash } from "react-icons/fa"; // นำเข้าไอคอน
 import { useToast } from "../component/ToastComponent";
 import AddedPlacesModal from "../component/addedplaces";
-import { FaPlus } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaTrash } from "react-icons/fa";
-
-const SearchSection = ({ onSearch }) => {
-  const [budget, setBudget] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const { t } = useTranslation();
-
-  const handleSearch = () => {
-    onSearch({ budget, categoryId });
-  };
-
-  return (
-    <div className="animate-fadeInDelay2 font-kanit bg-white shadow-lg rounded-lg p-6 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-11 w-6/12 mx-auto">
-      <select
-        className="border p-2 rounded-md"
-        value={budget}
-        onChange={(e) => setBudget(e.target.value)}
-      >
-        <option value="">{t("budget")}</option>
-        <option value="LOW">{t("low")}</option>
-        <option value="MEDIUM">{t("medium")}</option>
-        <option value="HIGH">{t("high")}</option>
-      </select>
-      <select
-        className="border p-2 rounded-md"
-        value={categoryId}
-        onChange={(e) => setCategoryId(e.target.value)}
-      >
-        <option value="">{t("ph_category")}</option>
-        <option value="1">{t("nature")}</option>
-        <option value="2">{t("temples")}</option>
-        <option value="3">{t("markets")}</option>
-        <option value="4">{t("cafepage")}</option>
-        <option value="5">{t("staypage")}</option>
-        <option value="6">{t("others")}</option>
-      </select>
-      <button
-        className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 duration-200"
-        onClick={handleSearch}
-      >
-        {t("search")}
-      </button>
-    </div>
-  );
-};
+import ML from "../component/ml";
+import { Button } from "antd";
 
 const PlaceCard = ({ place, onAdd }) => {
   const { t } = useTranslation();
+  const calculateAverageScore = (locationScore) => {
+    if (!locationScore || locationScore.length === 0) return 0;
+
+    const totalScore = locationScore.reduce(
+      (sum, score) => sum + score.score,
+      0
+    );
+    return totalScore / locationScore.length;
+  };
+
+  const averageScore = calculateAverageScore(place.locationScore);
   return (
     <div className="animate-fadeIn3Delay1 font-kanit bg-white shadow-lg rounded-lg p-4 w-80">
       <img
@@ -66,7 +33,7 @@ const PlaceCard = ({ place, onAdd }) => {
             <span
               key={i}
               className={`text-yellow-500 ${
-                i < place.averageScore ? "opacity-100" : "opacity-30"
+                i < averageScore ? "opacity-100" : "opacity-30"
               }`}
             >
               ★
@@ -91,6 +58,7 @@ const PlaceCard = ({ place, onAdd }) => {
 
 const SeeMorePage = () => {
   const { ToastComponent, showToast } = useToast();
+  const [allPlaces, setAllPlaces] = useState([]);
   const [filteredPlaces, setFilteredPlaces] = useState([]);
   const [selectedPlaces, setSelectedPlaces] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -105,6 +73,9 @@ const SeeMorePage = () => {
   const [newPlanDay, setNewPlanDay] = useState("");
   const [selectedPlanName, setSelectedPlanName] = useState("");
 
+  const [isMLOpen, setIsMLOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+
   const userId = localStorage.getItem("userID");
 
   const API_URL = import.meta.env.VITE_API_URL;
@@ -118,7 +89,7 @@ const SeeMorePage = () => {
   useEffect(() => {
     if (selectedPlan) {
       console.log("Selected Plan ID:", selectedPlan);
-      localStorage.setItem("selectedPlanId", selectedPlan); // เก็บไว้ใน LocalStorage
+      localStorage.setItem("selectedPlanId", selectedPlan);
     }
   }, [selectedPlan]);
 
@@ -126,9 +97,9 @@ const SeeMorePage = () => {
     if (selectedPlan) {
       const selectedPlanData = plans.find(
         (plan) => plan.planId === selectedPlan
-      ); // ค้นหาแผนจาก ID
+      );
       if (selectedPlanData) {
-        setSelectedPlanName(selectedPlanData.name); // อัพเดตชื่อแผน
+        setSelectedPlanName(selectedPlanData.name);
       }
     }
   }, [selectedPlan, plans]);
@@ -141,7 +112,7 @@ const SeeMorePage = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // เพิ่ม Token เข้าไป
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -158,6 +129,44 @@ const SeeMorePage = () => {
 
     if (userId) fetchUserPlans();
   }, [userId]);
+
+  const fetchAllPlaces = async () => {
+    try {
+      const response = await fetch(`${API_URL}/location/landing`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setAllPlaces(data.locations);
+      setFilteredPlaces(data.locations);
+    } catch (error) {
+      console.error("Error fetching all places:", error);
+      showToast(t("fetch_error"));
+    }
+  };
+
+  useEffect(() => {
+    fetchAllPlaces();
+  }, []);
+
+  const handleFilter = (categoryId) => {
+    setSelectedCategory(categoryId);
+    if (categoryId === "") {
+      setFilteredPlaces(allPlaces);
+    } else {
+      const filtered = allPlaces.filter(
+        (place) => place.category.categoryId === parseInt(categoryId, 10)
+      );
+      setFilteredPlaces(filtered);
+    }
+  };
 
   const createNewPlan = async () => {
     if (!newPlanName.trim() || !newPlanDay.trim()) return;
@@ -177,9 +186,9 @@ const SeeMorePage = () => {
       }
 
       const data = await response.json();
-      setPlans([...plans, data]); // เพิ่มแผนใหม่เข้าไป
-      setCreatingNewPlan(false); // กลับไปหน้าเลือกแผน
-      setNewPlanName(""); // เคลียร์ค่า input
+      setPlans([...plans, data]);
+      setCreatingNewPlan(false);
+      setNewPlanName("");
       setNewPlanDay("");
       window.location.reload();
     } catch (error) {
@@ -202,40 +211,13 @@ const SeeMorePage = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      // ลบแผนออกจาก state
       setPlans((prevPlans) =>
         prevPlans.filter((plan) => plan.planId !== planId)
       );
-      showToast(t("plan_deleted_successfully")); // แสดงข้อความสำเร็จ
+      showToast(t("plan_deleted_successfully"));
     } catch (error) {
       console.error("Error deleting plan:", error);
-      showToast(t("unknown_error")); // แสดงข้อความผิดพลาด
-    }
-  };
-
-  const handleSearch = async (filters) => {
-    try {
-      const response = await fetch(`${API_URL}/location/recommend`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(filters),
-      });
-
-      if (!response.ok) {
-        if (response.status === 400) {
-          showToast(t("error_budget"));
-          return;
-        }
-        showToast(t("unknown_error"));
-        return;
-      }
-      const data = await response.json();
-      setFilteredPlaces(data.recommendedLocations);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      showToast(t("fetch_error"));
+      showToast(t("unknown_error"));
     }
   };
 
@@ -259,7 +241,6 @@ const SeeMorePage = () => {
             <FaMap className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
           </h2>
           <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto mb-7 rounded-lg"></div>
-          <SearchSection onSearch={handleSearch} />
           {selectedPlanName && (
             <div className="mt-5">
               <h3 className="text-2xl font-bold">
@@ -270,44 +251,40 @@ const SeeMorePage = () => {
         </div>
         <div className="relative w-full flex justify-end mt-1">
           <div className="relative inline-block ">
-            <button
-              className="bg-green-500 text-white text-lg px-4 py-3 font-semibold rounded-md mb-4 hover:bg-green-600 duration-200 relative"
-              onClick={() => setIsModalOpen(true)}
-            >
-              {t("added_places")}
-            </button>
-            {selectedPlaces.length > 0 && (
-              <span className="animate-fadeIn2 absolute  -top-2 -right-2 bg-red-500 text-white text-base font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {selectedPlaces.length}
-              </span>
-            )}
+            <Button type="primary" className="font-kanit" onClick={() => setIsMLOpen(true)}>
+              Open Recommendation
+            </Button>
+            <ML isOpen={isMLOpen} onClose={() => setIsMLOpen(false)} />
           </div>
         </div>
 
+        {/* ปุ่มกรองประเภทสถานที่ */}
+        <div className="mb-6">
+          <select
+            className="border p-2 rounded-md"
+            value={selectedCategory}
+            onChange={(e) => handleFilter(e.target.value)}
+          >
+            <option value="">{t("ph_category")}</option>
+            <option value="1">{t("nature")}</option>
+            <option value="2">{t("temples")}</option>
+            <option value="3">{t("markets")}</option>
+            <option value="4">{t("cafepage")}</option>
+            <option value="5">{t("staypage")}</option>
+            <option value="6">{t("others")}</option>
+          </select>
+        </div>
+
+        {/* แสดงสถานที่ในรูปแบบแนวตั้ง */}
         {filteredPlaces.length > 0 && (
           <div className="animate-fadeIn2Delay1 mb-8">
             <h2 className="text-3xl font-bold mb-4">{t("attractions")}</h2>
-
-            <div
-              className="bg-gray-100 overflow-x-auto max-w-full p-7 border border-gray-200 rounded-lg shadow-inner"
-              style={{
-                scrollbarWidth: "thin",
-                scrollbarColor: "#cbd5e0 #f7fafc",
-              }}
-            >
-              <div
-                className="flex gap-6 flex-nowrap scroll-smooth"
-                style={{ minWidth: "100%", scrollSnapType: "x mandatory" }}
-              >
-                {filteredPlaces.map((place) => (
-                  <div
-                    key={place.locationId}
-                    className="scroll-snap-align-start"
-                  >
-                    <PlaceCard place={place} onAdd={handleAddToPlan} />
-                  </div>
-                ))}
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredPlaces.map((place) => (
+                <div key={place.locationId}>
+                  <PlaceCard place={place} onAdd={handleAddToPlan} />
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -319,6 +296,19 @@ const SeeMorePage = () => {
         />
         <div className="mb-6 mt-4 w-11/12 h-1 rounded-lg bg-gray-300 mx-auto"></div>
       </div>
+
+      {/* ปุ่มกลมๆ ลอยอยู่ */}
+      <button
+        className="fixed bottom-8 right-8 bg-green-500 text-white p-6 rounded-full shadow-lg hover:bg-green-600 duration-200 animate-bounce"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <FaMap className="text-2xl" />
+        {selectedPlaces.length > 0 && (
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-sm font-bold rounded-full w-6 h-6 flex items-center justify-center">
+            {selectedPlaces.length}
+          </span>
+        )}
+      </button>
 
       {showModal && (
         <div className="animate-fadeIn fixed inset-0 bg-gray-800 bg-opacity-70 flex items-center justify-center">
