@@ -89,7 +89,6 @@ const App = () => {
           <Route path="/landingadmin" element={<LandingAdmin/>} />
           <Route path="/landingadmin/:categoryId" element={<LandingAdmin/>} />
           <Route path="/googlemap" element={<GoogleMapTest/>} />
-          <Route path="/tripplanner" element={<TripPlanner/>} />
         </Routes>
       </Layout>
     </Router>

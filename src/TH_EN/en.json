@@ -120,6 +120,7 @@
     "please_login" : "Please log in to use this function.",
 
     "added_places" : "Add to travel plan",
+    "added_budget" : "Location and total costs",
     "no_added_places" : "No locations added, Please use the menu 'recommendation'",
     "already_in_plan" : "This location has been added.",
 
@@ -131,6 +132,16 @@
     "days": "Departure and return dates",
     "select_plan": "Select Plans",
     "planname": "Plan Name",
-    "total_price": "Total Price"
+    "openselect_plan": "Open Plan Selection",
+    "select_travel_plan": "Select Travel Plan",
+    "add_new_plan": "Add Plan",
+    "plan_name_placeholder": "Please enter the Plan name.",
+    "plan_date_placeholder": "Please enter the Departure and return dates.",
+    "create_new_plan": "Create New Plan",
+    "total_price": "Total Cost of each location",
+
+    "travel_cost": "Travel Cost",
+    "update_budget": "Update Budget",
+    "total_budget": "Total Budget"
   }
   

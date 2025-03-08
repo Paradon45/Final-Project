@@ -3,7 +3,8 @@ import { useToast } from "../component/ToastComponent";
 import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
 
-const GoogleMapTest = () => {
+const GoogleMapTest = ({ onSaveTravelCost }) => {
+  // เพิ่ม props onSaveTravelCost
   const [map, setMap] = useState(null);
   const [markers, setMarkers] = useState([]);
   const [directionsService, setDirectionsService] = useState(null);
@@ -57,8 +58,8 @@ const GoogleMapTest = () => {
         const locationsArray = plan.plan_location.map((loc) => ({
           locationId: loc.locationId,
           name: loc.location.name,
-          latitude: parseFloat(loc.location.latitude), // แปลงเป็น Float
-          longitude: parseFloat(loc.location.longitude), // แปลงเป็น Float
+          latitude: parseFloat(loc.location.latitude),
+          longitude: parseFloat(loc.location.longitude),
           imageUrl: loc.location.locationImg[0]?.url || "",
         }));
 
@@ -149,7 +150,7 @@ const GoogleMapTest = () => {
     if (
       !directionsService ||
       !directionsRenderer ||
-      !currentPosition || // ใช้ตำแหน่งปัจจุบันเสมอ
+      !currentPosition ||
       selectedLocations.length < 1 ||
       !isPlanValid
     ) {
@@ -174,7 +175,7 @@ const GoogleMapTest = () => {
       })
       .filter((loc) => loc !== null);
 
-    const origin = { lat: currentPosition.lat, lng: currentPosition.lng }; // ใช้ตำแหน่งปัจจุบันเสมอ
+    const origin = { lat: currentPosition.lat, lng: currentPosition.lng };
     const destination = waypoints[0]?.location || origin;
 
     directionsService.route(
@@ -201,8 +202,8 @@ const GoogleMapTest = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const pos = {
-            lat: parseFloat(position.coords.latitude), // แปลงเป็น Float
-            lng: parseFloat(position.coords.longitude), // แปลงเป็น Float
+            lat: parseFloat(position.coords.latitude),
+            lng: parseFloat(position.coords.longitude),
           };
           setCurrentPosition(pos);
 
@@ -245,7 +246,7 @@ const GoogleMapTest = () => {
             <div
               id="map"
               style={{
-                width: "90%",
+                width: "85%",
                 height: "500px",
                 margin: "0 auto",
                 marginTop: "30px",
@@ -256,28 +257,7 @@ const GoogleMapTest = () => {
               }}
             />
 
-            <div className="mt-10 flex gap-4">
-              <button
-                onClick={getCurrentPosition}
-                className="mb-4 px-5 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
-              >
-                ตำแหน่งปัจจุบัน
-              </button>
-
-              <button
-                onClick={calculateRoutes}
-                disabled={!currentPosition}
-                className={`mb-4 px-5 py-3 rounded-lg shadow-md transition ${
-                  currentPosition
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                }`}
-              >
-                ค้นหาเส้นทาง
-              </button>
-            </div>
-
-            <div className="overflow-x-auto border border-gray-300 bg-gray-100 rounded-lg p-2 w-11/12 mt-5 mb-10">
+            <div className="overflow-x-auto border border-gray-300 bg-gray-100 rounded-lg p-2 w-10/12 mt-6 mb-10">
               <div className="flex flex-nowrap space-x-4">
                 <AnimatePresence>
                   {locations.map((loc, index) => (
@@ -309,10 +289,32 @@ const GoogleMapTest = () => {
               </div>
             </div>
 
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={getCurrentPosition}
+                className="mb-4 px-5 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
+              >
+                ตำแหน่งปัจจุบัน
+              </button>
+
+              <button
+                onClick={calculateRoutes}
+                disabled={!currentPosition}
+                className={`mb-4 px-5 py-3 rounded-lg shadow-md transition ${
+                  currentPosition
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                }`}
+              >
+                ค้นหาเส้นทาง
+              </button>
+            </div>
+
             <RouteInfo
               routes={routes}
               locations={locations}
               planId={selectedPlan}
+              onSaveTravelCost={onSaveTravelCost} // ส่ง callback function ไปยัง RouteInfo
             />
           </>
         )}
@@ -321,7 +323,7 @@ const GoogleMapTest = () => {
   );
 };
 
-const RouteInfo = ({ routes, locations, planId }) => {
+const RouteInfo = ({ routes, locations, planId, onSaveTravelCost }) => {
   const [fuelEfficiency, setFuelEfficiency] = useState(4);
   const { ToastComponent, showToast } = useToast();
 
@@ -335,29 +337,11 @@ const RouteInfo = ({ routes, locations, planId }) => {
       console.error("No planId provided.");
       return;
     }
+    showToast("บันทึกค่าใช้จ่ายน้ำมันสำเร็จ!");
 
-    try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/plan/${planId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ budget: totalFuelCost }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Budget updated successfully:", data);
-      showToast("บันทึกค่าใช้จ่ายน้ำมันสำเร็จ!");
-    } catch (error) {
-      console.error("Error updating budget:", error);
-      showToast("เกิดข้อผิดพลาดในการบันทึกค่าใช้จ่ายน้ำมัน");
+    // ส่งค่าเดินทางไปยัง parent component
+    if (onSaveTravelCost) {
+      onSaveTravelCost(totalFuelCost);
     }
   };
 

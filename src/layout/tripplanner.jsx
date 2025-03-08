@@ -4,7 +4,11 @@ import { useToast } from "../component/ToastComponent";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { FaMap } from "react-icons/fa"; // นำเข้าไอคอน
+import { Badge } from "antd"; 
 import Googlemap from "./googlemaptest";
+import PlanSelectionModal from "../component/PlanSelectionModal";
+import AddedBudgetModal from "../component/addedbudget";
 
 function TripPlanner() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -12,7 +16,9 @@ function TripPlanner() {
   const [locationPlans, setLocationPlans] = useState([]);
   const [selectedPlanName, setSelectedPlanName] = useState("");
   const [isPlanValid, setIsPlanValid] = useState(true);
-  const [selectedLocations, setSelectedLocations] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [travelCost, setTravelCost] = useState(null);
 
   const userIdString = localStorage.getItem("userID");
   const userId = userIdString ? parseInt(userIdString, 10) : null;
@@ -78,14 +84,6 @@ function TripPlanner() {
     }
   }, [selectedPlan]);
 
-  const handleLocationSelect = (locationId) => {
-    setSelectedLocations((prevSelected) =>
-      prevSelected.includes(locationId)
-        ? prevSelected.filter((id) => id !== locationId)
-        : [...prevSelected, locationId]
-    );
-  };
-
   const handleDeleteLocation = async (locationId) => {
     try {
       const token = localStorage.getItem("token");
@@ -117,6 +115,10 @@ function TripPlanner() {
     }
   };
 
+  const handleSaveTravelCost = (cost) => {
+    setTravelCost(cost); // เก็บค่าเดินทาง
+  };
+
   const { ToastComponent, showToast } = useToast();
   const { t } = useTranslation();
 
@@ -128,14 +130,20 @@ function TripPlanner() {
           {t("tripplanner")}
           <FaMapMarkedAlt className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
         </h1>
+        <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto mb-7 rounded-lg"></div>
         {selectedPlanName && (
           <div className="mt-5">
             <h3 className="text-2xl font-bold">
               {t("selected_plan")} : {selectedPlanName}
             </h3>
+            <button
+              onClick={() => setShowModal(true)}
+              className="ml-2 mb-5 text-blue-600 hover:text-blue-400 transition duration-200"
+            >
+              {t("openselect_plan")}
+            </button>
           </div>
         )}
-        <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto mb-7 rounded-lg"></div>
 
         {!isPlanValid ? (
           <div className="text-center">
@@ -197,7 +205,37 @@ function TripPlanner() {
           </>
         )}
       </div>
-      <Googlemap />
+      <Googlemap onSaveTravelCost={handleSaveTravelCost} />
+
+      <PlanSelectionModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        userId={userId}
+        onSelectPlan={(planId) => {
+          setSelectedPlan(planId);
+          window.location.reload();
+          setShowModal(false);
+        }}
+      />
+
+      <AddedBudgetModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        travelCost={travelCost}
+      />
+      
+        <button
+          className="fixed bottom-8 right-8 bg-orange-500 text-white p-6 rounded-full shadow-lg hover:bg-orange-600 duration-200 animate-bounce z-[1000]"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <FaMap className="text-2xl" />
+          {travelCost !== null && (
+          <span className="absolute -top-2 -right-0 bg-red-500 text-white text-lg  rounded-full w-6 h-6 flex items-center justify-center">
+            !
+          </span>
+        )}
+        </button>
+      
 
       {!isAuthenticated && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-60 flex flex-col items-center justify-center ">

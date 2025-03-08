@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FaMap, FaPlus, FaTrash } from "react-icons/fa"; // นำเข้าไอคอน
+import { FaMap } from "react-icons/fa"; // นำเข้าไอคอน
 import { useToast } from "../component/ToastComponent";
 import AddedPlacesModal from "../component/addedplaces";
-import { motion, AnimatePresence } from "framer-motion";
+import PlanSelectionModal from "../component/PlanSelectionModal";
 import ML from "../component/ml";
 import { Button } from "antd";
 
@@ -68,14 +68,10 @@ const SeeMorePage = () => {
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showModal, setShowModal] = useState(true);
-  const [newPlanName, setNewPlanName] = useState("");
-  const [creatingNewPlan, setCreatingNewPlan] = useState(false);
-  const [newPlanDay, setNewPlanDay] = useState("");
   const [selectedPlanName, setSelectedPlanName] = useState("");
 
   const [isMLOpen, setIsMLOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
-
   const userId = localStorage.getItem("userID");
 
   const API_URL = import.meta.env.VITE_API_URL;
@@ -172,58 +168,6 @@ const SeeMorePage = () => {
     }
   };
 
-  const createNewPlan = async () => {
-    if (!newPlanName.trim() || !newPlanDay.trim()) return;
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/plan/createPlan/${userId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name: newPlanName, day: newPlanDay }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setPlans([...plans, data]);
-      setCreatingNewPlan(false);
-      setNewPlanName("");
-      setNewPlanDay("");
-      window.location.reload();
-    } catch (error) {
-      console.error("Error creating plan:", error);
-    }
-  };
-
-  const deletePlan = async (planId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/plan/${planId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      setPlans((prevPlans) =>
-        prevPlans.filter((plan) => plan.planId !== planId)
-      );
-      showToast(t("plan_deleted_successfully"));
-    } catch (error) {
-      console.error("Error deleting plan:", error);
-      showToast(t("unknown_error"));
-    }
-  };
 
   const handleAddToPlan = (place) => {
     setSelectedPlaces((prevSelectedPlaces) => {
@@ -250,6 +194,7 @@ const SeeMorePage = () => {
               <h3 className="text-2xl font-bold">
                 {t("selected_plan")} : {selectedPlanName}
               </h3>
+              <button onClick={() => setShowModal(true)} className="text-blue-600 hover:text-blue-400 transition duration-200">{t("openselect_plan")}</button>
             </div>
           )}
         </div>
@@ -317,82 +262,17 @@ const SeeMorePage = () => {
         )}
       </button>
 
-      {showModal && (
-        <div className="animate-fadeIn fixed inset-0 bg-gray-800 bg-opacity-70 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-2xl font-bold mb-4">เลือกแผนการเดินทาง</h2>
-
-            {plans.length > 0 && !creatingNewPlan ? (
-              <div className="max-h-[400px] overflow-y-auto">
-                <div className="space-y-2">
-                  <AnimatePresence>
-                    {plans.map((plan) => (
-                      <motion.div
-                        key={plan.planId}
-                        initial={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -100 }}
-                        transition={{ duration: 0.3 }}
-                        className="flex items-center justify-between space-x-2"
-                      >
-                        <button
-                          className="flex-1 bg-blue-500 text-white p-2 rounded text-left whitespace-normal break-words hover:bg-blue-600 duration-200"
-                          onClick={() => {
-                            setSelectedPlan(plan.planId);
-                            setShowModal(false);
-                          }}
-                        >
-                          {plan.name}
-                        </button>
-                        <button
-                          className="bg-red-500 text-white p-2 rounded hover:bg-red-600 duration-200 flex items-center justify-center"
-                          onClick={() => deletePlan(plan.planId)}
-                        >
-                          <FaTrash className="text-lg" />
-                        </button>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded w-full mt-2 flex items-center justify-center"
-                  onClick={() => setCreatingNewPlan(true)}
-                >
-                  <FaPlus className="mr-2" /> เพิ่มแผนใหม่
-                </button>
-              </div>
-            ) : (
-              <div>
-                <input
-                  type="text"
-                  className="border p-2 w-full mb-2"
-                  placeholder="ตั้งชื่อแผน"
-                  value={newPlanName}
-                  onChange={(e) => setNewPlanName(e.target.value)}
-                />
-                <input
-                  type="text"
-                  className="border p-2 w-full mb-2"
-                  placeholder="วันที่ไป - กลับ"
-                  value={newPlanDay}
-                  onChange={(e) => setNewPlanDay(e.target.value)}
-                />
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded w-full"
-                  onClick={createNewPlan}
-                >
-                  สร้างแผนใหม่
-                </button>
-                <button
-                  className="bg-gray-400 text-white px-4 py-2 rounded w-full mt-2"
-                  onClick={() => setCreatingNewPlan(false)}
-                >
-                  ย้อนกลับ
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      
+         <PlanSelectionModal
+         isOpen={showModal}
+         onClose={() => setShowModal(false)}
+         userId={userId}
+         onSelectPlan={(planId) => {
+           setSelectedPlan(planId);
+           setShowModal(false);
+         }}
+       />
+      
 
       {!isAuthenticated && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-60 flex flex-col items-center justify-center">
