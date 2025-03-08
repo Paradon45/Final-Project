@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom"; // นำเข้า Link จาก react-router-dom
 import "chart.js/auto";
 
 const Profile = () => {
@@ -37,8 +38,8 @@ const Profile = () => {
           throw new Error("Failed to fetch plans data");
         }
         const data = await response.json();
-        setPlans(data.plan);
-        if (data.plan.length > 0) {
+        setPlans(data.plan || []); // ตั้งค่า plans เป็นอาร์เรย์ว่างหากไม่มีข้อมูล
+        if (data.plan && data.plan.length > 0) {
           setSelectedPlan(data.plan[0]);
         }
       } catch (err) {
@@ -63,8 +64,26 @@ const Profile = () => {
     );
   }
 
+  // กรณีไม่มีแผนการเที่ยว
   if (plans.length === 0) {
-    return <p className="text-center text-xl font-bold">{t("no_plans_found")}</p>;
+    return (
+      <div className="animate-fadeIn min-h-screen bg-gradient-to-b from-gray-200 to-white py-12 px-4 font-kanit">
+        <div className="max-w-4xl mx-auto p-8 bg-white rounded-2xl shadow-xl border border-gray-200 text-center">
+          <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+            {t("no_plans_found")}
+          </h2>
+          <p className="text-gray-600 mb-6">
+            กรุณาสร้างแพลนเที่ยวอย่างน้อย 1 ครั้ง เพื่อสร้างโปรไฟล์
+          </p>
+          <Link
+            to="/recommend"
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition duration-200"
+          >
+            ไปยังหน้าแนะนำที่เที่ยว
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const user = plans[0].user;
