@@ -17,7 +17,9 @@ const AddedPlacesModal = ({
 
   // State สำหรับเก็บสถานที่ที่ถูกเลือก
   const [checkedPlaces, setCheckedPlaces] = useState([]);
-  // State สำหรับเก็บราคารวม
+  // State สำหรับเก็บสถานะการเลือกทั้งหมด
+  const [selectAll, setSelectAll] = useState(false);
+
   const [totalPrice, setTotalPrice] = useState(0);
 
   // คำนวณราคารวมทุกครั้งที่ checkedPlaces เปลี่ยนแปลง
@@ -33,6 +35,16 @@ const AddedPlacesModal = ({
     } else {
       setCheckedPlaces(checkedPlaces.filter((p) => p.locationId !== place.locationId));
     }
+  };
+
+  // ฟังก์ชันสำหรับเลือกหรือยกเลิกทั้งหมด
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setCheckedPlaces(selectedPlaces);
+    } else {
+      setCheckedPlaces([]);
+    }
+    setSelectAll(checked);
   };
 
   const handleConfirm = async () => {
@@ -101,53 +113,84 @@ const AddedPlacesModal = ({
         </div>
       }
     >
-      <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
-        {selectedPlaces.length > 0 ? (
-          selectedPlaces.map((place) => (
-            <AnimatePresence key={place.locationId}>
-              <motion.div
-                className="flex items-center mb-4"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{ duration: 0.4 }}
-              >
-                <Checkbox
-                  onChange={(e) => handleCheckboxChange(place, e.target.checked)}
-                  checked={checkedPlaces.some((p) => p.locationId === place.locationId)}
-                  className="custom-checkbox"
-                />
-                <div className="flex items-center flex-1 ml-4">
-                  <img
-                    src={place.locationImg[0].url}
-                    alt={place.name}
-                    className="w-24 h-24 object-cover rounded-md mr-3"
-                  />
-                  <span className="text-gray-800">{place.name}</span>
-                </div>
-                <Button
-                  type="text"
-                  danger
-                  onClick={() => handleRemove(place.locationId)}
-                  className="text-red-500 hover:text-red-600 text-3xl"
+      <div className="flex flex-col h-full">
+        {/* Checkbox เลือกทั้งหมด */}
+        {selectedPlaces.length > 0 && (
+        <div className="mb-4">
+          <Checkbox
+            onChange={(e) => handleSelectAll(e.target.checked)}
+            className="font-kanit"
+            checked={selectAll}
+          >
+            {t("select_all")}
+          </Checkbox>
+        </div>
+        )}
+
+        {/* รายการสถานที่ */}
+        <div className="flex-1 overflow-y-auto">
+          {selectedPlaces.length > 0 ? (
+            selectedPlaces.map((place) => (
+              <AnimatePresence key={place.locationId}>
+                <motion.div
+                  className="flex items-center mb-4"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.4 }}
                 >
-                  <FaTrash className="text-lg" />
-                </Button>
-              </motion.div>
-            </AnimatePresence>
-          ))
-        ) : (
-          <p className="text-gray-500">{t("no_added_places")}</p>
+                  <Checkbox
+                    onChange={(e) => handleCheckboxChange(place, e.target.checked)}
+                    checked={checkedPlaces.some((p) => p.locationId === place.locationId)}
+                    className="custom-checkbox"
+                  />
+                  <div className="flex items-center flex-1 ml-4">
+                    <img
+                      src={place.locationImg[0].url}
+                      alt={place.name}
+                      className="w-24 h-24 object-cover rounded-md mr-3"
+                    />
+                    <span className="text-gray-800">{place.name}</span>
+                  </div>
+                  <Button
+                    type="text"
+                    danger
+                    onClick={() => handleRemove(place.locationId)}
+                    className="text-red-500 hover:text-red-600 text-3xl"
+                  >
+                    <FaTrash className="text-lg" />
+                  </Button>
+                </motion.div>
+              </AnimatePresence>
+            ))
+          ) : (
+            <p className="text-gray-500">{t("no_added_places")}</p>
+          )}
+        </div>
+
+        {/* แสดงรายการสถานที่ที่ถูกเลือก */}
+        {checkedPlaces.length > 0 && (
+          <div className="mt-6 border-t pt-4">
+            <h3 className="text-lg font-bold mb-2">{t("selected_places")}</h3>
+            <div className="space-y-2">
+              {checkedPlaces.map((place) => (
+                <div key={place.locationId} className="flex justify-between">
+                  <span className="text-gray-800">{place.name}</span>
+                  <span className="text-gray-600">฿{place.price.toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* แสดงราคารวม */}
+        {checkedPlaces.length > 0 && (
+          <div className="mt-6 border-t pt-4">
+            <h3 className="text-lg font-bold">{t("total_price")}</h3>
+            <p className="text-xl text-green-600">฿{totalPrice.toLocaleString()}</p>
+          </div>
         )}
       </div>
-
-      {/* แสดงราคารวม */}
-      {checkedPlaces.length > 0 && (
-        <div className="mt-6 border-t pt-4">
-          <h3 className="text-lg font-bold">{t("total_price")}</h3>
-          <p className="text-xl text-green-600">฿{totalPrice.toLocaleString()}</p>
-        </div>
-      )}
     </Drawer>
   );
 };

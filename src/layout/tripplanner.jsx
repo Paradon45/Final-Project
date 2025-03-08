@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
-import { FaMapMarkedAlt } from "react-icons/fa";
+import { FaMapMarkedAlt, FaTrash } from "react-icons/fa";
 import { useToast } from "../component/ToastComponent";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import Googlemap from "./googlemaptest";
 
 function TripPlanner() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [locationPlans, setLocationPlans] = useState([]);
   const [selectedPlanName, setSelectedPlanName] = useState("");
-  const [isPlanValid, setIsPlanValid] = useState(true); // เพิ่ม state เพื่อตรวจสอบว่าแผนถูกต้องหรือไม่
+  const [isPlanValid, setIsPlanValid] = useState(true);
+  const [selectedLocations, setSelectedLocations] = useState([]);
 
   const userIdString = localStorage.getItem("userID");
   const userId = userIdString ? parseInt(userIdString, 10) : null;
@@ -37,22 +39,19 @@ function TripPlanner() {
 
         const data = await response.json();
 
-        // ตรวจสอบว่า userId ของแผนตรงกับ userId ของผู้ใช้ที่ล็อกอินอยู่หรือไม่
         if (data.plan.userId !== userId) {
-          setIsPlanValid(false); // ถ้าไม่ตรงกัน ให้ตั้งค่า isPlanValid เป็น false
+          setIsPlanValid(false);
           return;
         }
 
-        setIsPlanValid(true); // ถ้าตรงกัน ให้ตั้งค่า isPlanValid เป็น true
+        setIsPlanValid(true);
         const locations = data.plan.plan_location.map((loc) => ({
           locationId: loc.locationId,
           name: loc.location.name,
           imageUrl: loc.location.locationImg[0]?.url || "",
         }));
         setLocationPlans(locations);
-
-        // ดึงชื่อแผนการเดินทางจาก API
-        setSelectedPlanName(data.plan.name); // ตั้งค่า selectedPlanName จาก data.plan.name
+        setSelectedPlanName(data.plan.name);
       } catch (error) {
         console.error("Error fetching plan locations:", error);
       }
@@ -66,7 +65,6 @@ function TripPlanner() {
     const token = localStorage.getItem("token");
     setIsAuthenticated(!!token);
 
-    // ตรวจสอบว่า selectedPlanId มีอยู่ใน LocalStorage หรือไม่
     const storedSelectedPlanId = localStorage.getItem("selectedPlanId");
     if (storedSelectedPlanId) {
       setSelectedPlan(storedSelectedPlanId);
@@ -80,31 +78,44 @@ function TripPlanner() {
     }
   }, [selectedPlan]);
 
-  useEffect(() => {
-    const fetchUserPlans = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`${API_URL}/user/${userId}`, {
-          method: "GET",
+  const handleLocationSelect = (locationId) => {
+    setSelectedLocations((prevSelected) =>
+      prevSelected.includes(locationId)
+        ? prevSelected.filter((id) => id !== locationId)
+        : [...prevSelected, locationId]
+    );
+  };
+
+  const handleDeleteLocation = async (locationId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${API_URL}/plan/${selectedPlan}/plan_location/${locationId}`,
+        {
+          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
         }
+      );
 
-        const data = await response.json();
-        setPlans(data.plan || []);
-      } catch (error) {
-        console.error("Error fetching user plans:", error);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-    };
 
-    if (userId) fetchUserPlans();
-  }, [userId]);
+      // อัปเดตสถานที่ในแผนการเดินทางหลังจากลบสำเร็จ
+      setLocationPlans((prevLocations) =>
+        prevLocations.filter((loc) => loc.locationId !== locationId)
+      );
+
+      showToast("ลบสถานที่สำเร็จ!");
+      window.location.reload();
+    } catch (error) {
+      console.error("Error deleting location:", error);
+      showToast("เกิดข้อผิดพลาดในการลบสถานที่");
+    }
+  };
 
   const { ToastComponent, showToast } = useToast();
   const { t } = useTranslation();
@@ -126,7 +137,6 @@ function TripPlanner() {
         )}
         <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto mb-7 rounded-lg"></div>
 
-        {/* ตรวจสอบว่าแผนการเดินทางถูกต้องหรือไม่ */}
         {!isPlanValid ? (
           <div className="text-center">
             <p className="text-xl text-gray-700 mb-4">
@@ -153,14 +163,13 @@ function TripPlanner() {
           </div>
         ) : (
           <>
-            {/* แสดงสถานที่ทั้งหมดในแผนการเดินทาง */}
             <div className="overflow-x-auto border border-gray-300 bg-gray-100 rounded-lg p-2">
               <div className="flex flex-nowrap space-x-4">
                 <AnimatePresence>
                   {locationPlans.map((loc, index) => (
                     <motion.div
                       key={index}
-                      className="flex-none w-80 bg-gray-50 p-3 rounded-lg shadow"
+                      className="flex-none w-96 bg-gray-50 p-3 rounded-lg shadow"
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
@@ -173,32 +182,25 @@ function TripPlanner() {
                           className="w-64 h-24 rounded"
                         />
                         <span>{loc.name}</span>
+                        <button
+                          onClick={() => handleDeleteLocation(loc.locationId)}
+                          className="ml-auto px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200"
+                        >
+                          <FaTrash />
+                        </button>
                       </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
               </div>
             </div>
-
-            {/* ปุ่ม Save */}
-            {locationPlans.length > 0 && (
-              <Link
-                to="/googlemap"
-                state={{
-                  locationIds: locationPlans.map((loc) => loc.locationId),
-                  planId: selectedPlan,
-                }}
-                className="block mx-auto mt-6 bg-orange-500 text-white px-6 py-2 rounded hover:bg-orange-600 duration-200 text-center w-24"
-              >
-                {t("save")}
-              </Link>
-            )}
           </>
         )}
       </div>
+      <Googlemap />
 
       {!isAuthenticated && (
-        <div className="absolute top-0 left-0 w-full h-full bg-gray-800 bg-opacity-60 flex flex-col items-center justify-center">
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-60 flex flex-col items-center justify-center ">
           <p className="animate-fadeIn font-kanit text-2xl font-bold text-red-600 bg-white p-4 rounded-md shadow-lg">
             {t("please_login")}
           </p>

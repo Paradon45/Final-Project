@@ -146,9 +146,7 @@ const SeeMorePage = () => {
 
       const data = await response.json();
       // กรองสถานที่ที่มี categoryId = 5 ออก
-      const filteredData = data.locations.filter(
-        (place) => place.category.categoryId !== 5
-      );
+      const filteredData = data.locations
       setAllPlaces(filteredData);
       setFilteredPlaces(filteredData);
     } catch (error) {
@@ -257,7 +255,11 @@ const SeeMorePage = () => {
         </div>
         <div className="relative w-full flex justify-end mt-1">
           <div className="relative inline-block ">
-            <Button type="primary" className="font-kanit" onClick={() => setIsMLOpen(true)}>
+            <Button
+              type="primary"
+              className="font-kanit"
+              onClick={() => setIsMLOpen(true)}
+            >
               Open Recommendation
             </Button>
             <ML isOpen={isMLOpen} onClose={() => setIsMLOpen(false)} />
@@ -276,6 +278,7 @@ const SeeMorePage = () => {
             <option value="2">{t("temples")}</option>
             <option value="3">{t("markets")}</option>
             <option value="4">{t("cafepage")}</option>
+            <option value="5">{t("staypage")}</option>
             <option value="6">{t("others")}</option>
           </select>
         </div>
@@ -297,11 +300,11 @@ const SeeMorePage = () => {
       </div>
 
       <AddedPlacesModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          selectedPlaces={selectedPlaces}
-          setSelectedPlaces={setSelectedPlaces}
-        />
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        selectedPlaces={selectedPlaces}
+        setSelectedPlaces={setSelectedPlaces}
+      />
       <button
         className="fixed bottom-8 right-8 bg-green-500 text-white p-6 rounded-full shadow-lg hover:bg-green-600 duration-200 animate-bounce z-[1000]"
         onClick={() => setIsModalOpen(true)}
@@ -392,7 +395,7 @@ const SeeMorePage = () => {
       )}
 
       {!isAuthenticated && (
-        <div className="absolute top-0 left-0 w-full h-full bg-gray-800 bg-opacity-60 flex flex-col items-center justify-center">
+        <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-60 flex flex-col items-center justify-center">
           <p className="animate-fadeIn font-kanit text-2xl font-bold text-red-600 bg-white p-4 rounded-md shadow-lg">
             {t("please_login")}
           </p>

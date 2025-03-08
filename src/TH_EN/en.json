@@ -124,6 +124,13 @@
     "already_in_plan" : "This location has been added.",
 
     "plan_deleted_successfully": "Plan deleted successfully!",
+    "select_all": "select all",
+    "selected_places": "Selected Places",
+    "travel_plans": "My Travel Plans",
+    "price": "Price",
+    "days": "Departure and return dates",
+    "select_plan": "Select Plans",
+    "planname": "Plan Name",
     "total_price": "Total Price"
   }
   

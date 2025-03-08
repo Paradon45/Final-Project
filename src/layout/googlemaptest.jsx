@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { useToast } from "../component/ToastComponent";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 
 const GoogleMapTest = () => {
   const [map, setMap] = useState(null);
@@ -12,56 +11,66 @@ const GoogleMapTest = () => {
   const [routes, setRoutes] = useState([]);
   const [currentPosition, setCurrentPosition] = useState(null);
   const [locations, setLocations] = useState([]);
-  const [filteredLocations, setFilteredLocations] = useState([]);
+  const [selectedLocations, setSelectedLocations] = useState([]);
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [isPlanValid, setIsPlanValid] = useState(true);
 
-
-  const location = useLocation();
-  const { locationIds, planId } = location.state || {
-    locationIds: [],
-    planId: null,
-  };
-
-  console.log("Received planId:", planId);
-  console.log("Received locationIds:", locationIds);
+  const userIdString = localStorage.getItem("userID");
+  const userId = userIdString ? parseInt(userIdString, 10) : null;
 
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const fetchLocations = async () => {
+    const storedSelectedPlanId = localStorage.getItem("selectedPlanId");
+    if (storedSelectedPlanId) {
+      setSelectedPlan(storedSelectedPlanId);
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchPlanDetails = async () => {
       try {
-        const response = await fetch(`${API_URL}/location/landing`);
-        const data = await response.json();
+        const token = localStorage.getItem("token");
+        const response = await fetch(`${API_URL}/plan/${selectedPlan}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-        const locationsArray = Object.values(data.locations);
-
-        if (Array.isArray(locationsArray)) {
-          setLocations(locationsArray);
-
-          if (locationIds && Array.isArray(locationIds)) {
-            const filtered = locationsArray.filter((loc) =>
-              locationIds.includes(loc.locationId)
-            );
-            setFilteredLocations(filtered);
-          } else {
-            setFilteredLocations([]);
-          }
-        } else {
-          console.error(
-            "Data from API is not an object or cannot be converted to array:",
-            data
-          );
-          setFilteredLocations([]);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
+
+        const data = await response.json();
+        const plan = data.plan;
+
+        if (plan.userId !== userId) {
+          setIsPlanValid(false);
+          return;
+        }
+
+        setIsPlanValid(true);
+
+        const locationsArray = plan.plan_location.map((loc) => ({
+          locationId: loc.locationId,
+          name: loc.location.name,
+          latitude: parseFloat(loc.location.latitude), // แปลงเป็น Float
+          longitude: parseFloat(loc.location.longitude), // แปลงเป็น Float
+          imageUrl: loc.location.locationImg[0]?.url || "",
+        }));
+
+        setLocations(locationsArray);
+        setSelectedLocations(locationsArray.map((loc) => loc.locationId));
       } catch (error) {
-        console.error("Error fetching locations:", error);
-        setFilteredLocations([]);
+        console.error("Error fetching plan details:", error);
       }
     };
 
-    fetchLocations();
-  }, [locationIds]);
+    if (selectedPlan) fetchPlanDetails();
+  }, [selectedPlan, API_URL, userId]);
 
   useEffect(() => {
     const initMap = () => {
@@ -102,38 +111,47 @@ const GoogleMapTest = () => {
   }, []);
 
   useEffect(() => {
-    if (map && filteredLocations.length > 0) {
-      // ลบ Marker เก่าทิ้ง
+    if (map && locations.length > 0 && isPlanValid) {
       markers.forEach((marker) => marker.setMap(null));
       setMarkers([]);
 
-      // สร้าง Marker สำหรับแต่ละสถานที่
-      const newMarkers = filteredLocations.map((loc) => {
-        return new window.google.maps.Marker({
-          position: { lat: loc.latitude, lng: loc.longitude },
-          map,
-          title: loc.name,
-          icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png", // ไอคอนปกติ
+      const newMarkers = locations
+        .filter((loc) => selectedLocations.includes(loc.locationId))
+        .map((loc) => {
+          return new window.google.maps.Marker({
+            position: { lat: loc.latitude, lng: loc.longitude },
+            map,
+            title: loc.name,
+            icon: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+          });
         });
-      });
 
       setMarkers(newMarkers);
     }
-  }, [map, filteredLocations]);
+  }, [map, locations, selectedLocations, isPlanValid]);
 
   useEffect(() => {
-    if (map) {
+    if (map && isPlanValid) {
       setDirectionsService(new window.google.maps.DirectionsService());
       setDirectionsRenderer(new window.google.maps.DirectionsRenderer({ map }));
     }
-  }, [map]);
+  }, [map, isPlanValid]);
+
+  const handleLocationSelect = (locationId) => {
+    setSelectedLocations((prevSelected) =>
+      prevSelected.includes(locationId)
+        ? prevSelected.filter((id) => id !== locationId)
+        : [...prevSelected, locationId]
+    );
+  };
 
   const calculateRoutes = () => {
     if (
       !directionsService ||
       !directionsRenderer ||
-      !currentPosition ||
-      filteredLocations.length < 1
+      !currentPosition || // ใช้ตำแหน่งปัจจุบันเสมอ
+      selectedLocations.length < 1 ||
+      !isPlanValid
     ) {
       console.error(
         "Directions service or renderer not initialized, or no current position."
@@ -141,26 +159,29 @@ const GoogleMapTest = () => {
       return;
     }
 
-    // ลบ Marker ของแต่ละสถานที่
     markers.forEach((marker) => marker.setMap(null));
     setMarkers([]);
 
-    const waypoints = filteredLocations.slice(1).map((loc) => ({
-      location: { lat: loc.latitude, lng: loc.longitude },
-      stopover: true,
-    }));
+    const waypoints = selectedLocations
+      .map((locationId) => {
+        const loc = locations.find((l) => l.locationId === locationId);
+        return loc
+          ? {
+              location: { lat: loc.latitude, lng: loc.longitude },
+              stopover: true,
+            }
+          : null;
+      })
+      .filter((loc) => loc !== null);
 
-    const origin = { lat: currentPosition.lat, lng: currentPosition.lng };
-    const destination = {
-      lat: filteredLocations[0].latitude,
-      lng: filteredLocations[0].longitude,
-    };
+    const origin = { lat: currentPosition.lat, lng: currentPosition.lng }; // ใช้ตำแหน่งปัจจุบันเสมอ
+    const destination = waypoints[0]?.location || origin;
 
     directionsService.route(
       {
         origin,
         destination,
-        waypoints,
+        waypoints: waypoints.slice(1),
         travelMode: window.google.maps.TravelMode.DRIVING,
         provideRouteAlternatives: true,
       },
@@ -180,24 +201,22 @@ const GoogleMapTest = () => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const pos = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
+            lat: parseFloat(position.coords.latitude), // แปลงเป็น Float
+            lng: parseFloat(position.coords.longitude), // แปลงเป็น Float
           };
           setCurrentPosition(pos);
 
-          // ลบ Marker เก่าของตำแหน่งปัจจุบัน (ถ้ามี)
           markers.forEach((marker) => {
             if (marker.getTitle() === "ตำแหน่งปัจจุบัน") {
               marker.setMap(null);
             }
           });
 
-          // สร้าง Marker สำหรับตำแหน่งปัจจุบัน
           const currentMarker = new window.google.maps.Marker({
             position: pos,
             map,
             title: "ตำแหน่งปัจจุบัน",
-            icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", // ไอคอนพิเศษ
+            icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
           });
 
           setMarkers((prevMarkers) => [...prevMarkers, currentMarker]);
@@ -214,81 +233,119 @@ const GoogleMapTest = () => {
 
   return (
     <div>
-       <div className="text-left mb-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="font-kanit px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold rounded-lg shadow transition duration-200 mt-20 ml-6"
-          >
-            {t("back")}
-          </button>
-        </div>
       <div className="font-kanit flex flex-col items-center">
-        <div
-          id="map"
-          style={{
-            width: "90%",
-            height: "500px",
-            margin: "0 auto",
-            marginTop: "0px",
-          }}
-        />
+        {!isPlanValid ? (
+          <div className="text-center mt-40">
+            <p className="text-xl text-gray-700 mb-4">
+              คุณไม่มีสิทธิ์เข้าถึงแผนการเดินทางนี้
+            </p>
+          </div>
+        ) : (
+          <>
+            <div
+              id="map"
+              style={{
+                width: "90%",
+                height: "500px",
+                margin: "0 auto",
+                marginTop: "30px",
+                borderRadius: "0.5rem",
+                boxShadow:
+                  "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                border: "1px solid #e5e7eb",
+              }}
+            />
 
-       
+            <div className="mt-10 flex gap-4">
+              <button
+                onClick={getCurrentPosition}
+                className="mb-4 px-5 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
+              >
+                ตำแหน่งปัจจุบัน
+              </button>
 
-        <div className="mt-4 flex gap-4">
-          <button
-            onClick={getCurrentPosition}
-            className="mb-4 px-5 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
-          >
-            ตำแหน่งปัจจุบัน
-          </button>
+              <button
+                onClick={calculateRoutes}
+                disabled={!currentPosition}
+                className={`mb-4 px-5 py-3 rounded-lg shadow-md transition ${
+                  currentPosition
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                }`}
+              >
+                ค้นหาเส้นทาง
+              </button>
+            </div>
 
-          <button
-            onClick={calculateRoutes}
-            disabled={!currentPosition} // ปิดการใช้งานถ้ายังไม่มีตำแหน่งปัจจุบัน
-            className={`mb-4 px-5 py-3 rounded-lg shadow-md transition ${
-              currentPosition
-                ? "bg-blue-600 text-white hover:bg-blue-700"
-                : "bg-gray-400 text-gray-200 cursor-not-allowed"
-            }`}
-          >
-            ค้นหาเส้นทาง
-          </button>
-        </div>
+            <div className="overflow-x-auto border border-gray-300 bg-gray-100 rounded-lg p-2 w-11/12 mt-5 mb-10">
+              <div className="flex flex-nowrap space-x-4">
+                <AnimatePresence>
+                  {locations.map((loc, index) => (
+                    <motion.div
+                      key={index}
+                      className="flex-none w-80 bg-gray-50 p-3 rounded-lg shadow"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedLocations.includes(loc.locationId)}
+                          onChange={() => handleLocationSelect(loc.locationId)}
+                          className="mr-2 border-2"
+                        />
+                        <img
+                          src={loc.imageUrl}
+                          alt={loc.name}
+                          className="w-64 h-24 rounded object-cover"
+                        />
+                        <span className="text-sm">{loc.name}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
 
-        <RouteInfo routes={routes} locations={filteredLocations} />
+            <RouteInfo
+              routes={routes}
+              locations={locations}
+              planId={selectedPlan}
+            />
+          </>
+        )}
       </div>
     </div>
   );
 };
 
-const RouteInfo = ({ routes, locations }) => {
-  const [fuelEfficiency, setFuelEfficiency] = useState(15); // อัตราสิ้นเปลืองน้ำมัน (กม./ลิตร)
+const RouteInfo = ({ routes, locations, planId }) => {
+  const [fuelEfficiency, setFuelEfficiency] = useState(4);
   const { ToastComponent, showToast } = useToast();
 
   const calculateFuelCost = (totalDistance) => {
-    const fuelUsed = totalDistance / fuelEfficiency; // ปริมาณน้ำมันที่ใช้ (ลิตร)
-    const fuelCost = fuelUsed * 35.35; // ค่าใช้จ่ายน้ำมัน (บาท)
-    return fuelCost.toFixed(2); // ปัดเศษเป็นทศนิยม 2 ตำแหน่ง
+    const fuelCost = totalDistance * fuelEfficiency;
+    return fuelCost.toFixed(2);
   };
 
   const handleSave = async (totalFuelCost) => {
-    const selectedPlanId = localStorage.getItem("selectedPlanId"); // ดึง planId จาก localStorage
-    if (!selectedPlanId) {
-      console.error("No planId found.");
+    if (!planId) {
+      console.error("No planId provided.");
       return;
     }
 
     try {
       const API_URL = import.meta.env.VITE_API_URL;
       const token = localStorage.getItem("token");
-      const response = await fetch(`${API_URL}/plan/${selectedPlanId}`, {
+      const response = await fetch(`${API_URL}/plan/${planId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ budget: totalFuelCost }), // ส่ง totalFuelCost ไปอัปเดต budget
+        body: JSON.stringify({ budget: totalFuelCost }),
       });
 
       if (!response.ok) {
@@ -314,10 +371,9 @@ const RouteInfo = ({ routes, locations }) => {
           เส้นทางทั้งหมด
         </h3>
 
-        {/* เพิ่มช่องกรอกอัตราสิ้นเปลืองน้ำมัน */}
         <div className="mb-6">
           <label className="block text-gray-700 font-medium mb-2 text-lg">
-            อัตราสิ้นเปลืองน้ำมัน (กม./ลิตร):
+            อัตราสิ้นเปลือง :
           </label>
           <input
             type="number"
@@ -337,7 +393,6 @@ const RouteInfo = ({ routes, locations }) => {
           return (
             <div key={index} className="mb-6 p-4 bg-gray-100 rounded-lg shadow">
               {route.legs.map((leg, legIndex) => {
-                // หาชื่อสถานที่จาก filteredLocations
                 const startLocation = locations.find(
                   (loc) =>
                     loc.latitude === leg.start_location.lat() &&
@@ -380,18 +435,14 @@ const RouteInfo = ({ routes, locations }) => {
                 นาที
               </p>
               <p className="font-semibold text-gray-800 text-lg">
-                <strong>
-                  ค่าใช้จ่ายน้ำมัน (แก๊สโซฮอล 95 ลิตรละ 35.35 บาท) :
-                </strong>{" "}
-                {totalFuelCost} บาท
+                <strong>ค่าเดินทาง :</strong> {totalFuelCost} บาท
               </p>
 
-              {/* ปุ่มบันทึกค่าใช้จ่ายน้ำมัน */}
               <button
                 onClick={() => handleSave(totalFuelCost)}
                 className="px-5 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition mt-4"
               >
-                บันทึกค่าใช้จ่ายน้ำมัน
+                บันทึกค่าเดินทาง
               </button>
             </div>
           );

@@ -3,7 +3,7 @@ import { FaHotel } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import AddedPlacesModal from "../component/addedplaces";
-import { FaMap } from "react-icons/fa";
+import { FaMap, FaFilter } from "react-icons/fa";
 
 const Cafepage = () => {
   const { t } = useTranslation();
@@ -12,6 +12,8 @@ const Cafepage = () => {
   const [error, setError] = useState(null);
   const [selectedPlaces, setSelectedPlaces] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filterByPrice, setFilterByPrice] = useState(false); // สถานะการกรองตามราคา
+  const [filterByRating, setFilterByRating] = useState(false); // สถานะการกรองตามคะแนน
 
   const API_URL = import.meta.env.VITE_API_URL;
 
@@ -50,6 +52,26 @@ const Cafepage = () => {
     return totalScore / locationScore.length;
   };
 
+  // ฟังก์ชันสำหรับกรองสถานที่ตามราคา
+  const handleFilterByPrice = () => {
+    setFilterByPrice(!filterByPrice);
+    const sortedStays = [...stays].sort((a, b) =>
+      filterByPrice ? a.price - b.price : b.price - a.price
+    );
+    setStays(sortedStays);
+  };
+
+  // ฟังก์ชันสำหรับกรองสถานที่ตามคะแนน
+  const handleFilterByRating = () => {
+    setFilterByRating(!filterByRating);
+    const sortedStays = [...stays].sort((a, b) => {
+      const scoreA = calculateAverageScore(a.locationScore);
+      const scoreB = calculateAverageScore(b.locationScore);
+      return filterByRating ? scoreA - scoreB : scoreB - scoreA;
+    });
+    setStays(sortedStays);
+  };
+
   return (
     <div>
       <div className="font-kanit bg-gradient-to-b from-gray-200 to-white animate-fadeIn max-w-7xl mx-auto p-8 md:p-16">
@@ -59,6 +81,32 @@ const Cafepage = () => {
             <FaHotel className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
           </h2>
           <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto rounded-lg"></div>
+        </div>
+
+        {/* ปุ่มตัวกรอง */}
+        <div className="flex justify-end gap-4 mb-8">
+          <button
+            onClick={handleFilterByPrice}
+            className={`flex items-center px-4 py-2 rounded-lg shadow-md transition duration-300 ${
+              filterByPrice
+                ? "bg-orange-500 text-white"
+                : "bg-white text-gray-800"
+            }`}
+          >
+            <FaFilter className="mr-2" />
+            {filterByPrice ? "ราคาสูง-ต่ำ" : "ราคาต่ำ-สูง"}
+          </button>
+          <button
+            onClick={handleFilterByRating}
+            className={`flex items-center px-4 py-2 rounded-lg shadow-md transition duration-300 ${
+              filterByRating
+                ? "bg-orange-500 text-white"
+                : "bg-white text-gray-800"
+            }`}
+          >
+            <FaFilter className="mr-2" />
+            {filterByRating ? "คะแนนสูง-ต่ำ" : "คะแนนต่ำ-สูง"}
+          </button>
         </div>
 
         {loading && (
@@ -103,21 +151,28 @@ const Cafepage = () => {
                     <h3 className="text-xl font-bold text-gray-800 mt-2">
                       {stay.name}
                     </h3>
-                    <span className="text-yellow-500 text-2xl">
-                      {[...Array(5)].map((_, i) => (
-                        <span
-                          key={i}
-                          className={`text-yellow-500 ${
-                            i < averageScore ? "opacity-100" : "opacity-30"
-                          }`}
-                        >
-                          ★
+                    <div className="flex justify-between items-center mt-2">
+                      <div className="flex items-center">
+                        <span className="text-yellow-500 text-2xl">
+                          {[...Array(5)].map((_, i) => (
+                            <span
+                              key={i}
+                              className={`text-yellow-500 ${
+                                i < averageScore ? "opacity-100" : "opacity-30"
+                              }`}
+                            >
+                              ★
+                            </span>
+                          ))}
                         </span>
-                      ))}
-                    </span>
-                    <span className="text-gray-600 ml-3">
-                      ({averageScore.toFixed(1) || 0})
-                    </span>
+                        <span className="text-gray-600 ml-3">
+                          ({averageScore.toFixed(1) || 0})
+                        </span>
+                      </div>
+                      <span className="text-gray-800 font-bold">
+                        ฿{stay.price.toLocaleString()}
+                      </span>
+                    </div>
                     <p className="text-gray-600 mt-3 text-sm leading-relaxed">
                       {stay.description.length > 100
                         ? `${stay.description.substring(0, 100)}...`
