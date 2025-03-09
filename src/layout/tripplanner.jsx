@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { FaMapMarkedAlt, FaTrash } from "react-icons/fa";
+import { FaMapMarkedAlt, FaTrash, FaMap } from "react-icons/fa";
 import { useToast } from "../component/ToastComponent";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { FaMap } from "react-icons/fa"; // นำเข้าไอคอน
-import { Badge } from "antd"; 
 import Googlemap from "./googlemaptest";
+import Googlemapcurrent from "./googlemapcurrent";
 import PlanSelectionModal from "../component/PlanSelectionModal";
 import AddedBudgetModal from "../component/addedbudget";
 
@@ -19,6 +18,11 @@ function TripPlanner() {
   const [showModal, setShowModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [travelCost, setTravelCost] = useState(null);
+  const [showGoogleMap, setShowGoogleMap] = useState(() => {
+    // เรียกค่า state จาก localStorage เมื่อโหลดหน้า
+    const storedShowGoogleMap = localStorage.getItem("showGoogleMap");
+    return storedShowGoogleMap ? JSON.parse(storedShowGoogleMap) : true;
+  });
 
   const userIdString = localStorage.getItem("userID");
   const userId = userIdString ? parseInt(userIdString, 10) : null;
@@ -83,6 +87,11 @@ function TripPlanner() {
       localStorage.setItem("selectedPlanId", selectedPlan);
     }
   }, [selectedPlan]);
+
+  useEffect(() => {
+    // บันทึก state showGoogleMap ลงใน localStorage เมื่อมีการเปลี่ยนแปลง
+    localStorage.setItem("showGoogleMap", JSON.stringify(showGoogleMap));
+  }, [showGoogleMap]);
 
   const handleDeleteLocation = async (locationId) => {
     try {
@@ -205,7 +214,25 @@ function TripPlanner() {
           </>
         )}
       </div>
-      <Googlemap onSaveTravelCost={handleSaveTravelCost} />
+
+      {/* ปุ่มสลับระหว่างแผนที่ */}
+      {isAuthenticated && selectedPlan && (
+        <div className="fixed top-20 right-8 flex flex-col space-y-4 z-[1000]">
+          <button
+            className="bg-orange-500 text-white p-4 rounded-full shadow-lg hover:bg-orange-600 duration-200"
+            onClick={() => setShowGoogleMap(!showGoogleMap)}
+          >
+            {showGoogleMap ? "นำทางจากที่อยู่ปัจจุบัน" : "นำทางจากสถานที่"}
+          </button>
+        </div>
+      )}
+
+      {/* แสดงแผนที่ตาม state */}
+      {showGoogleMap ? (
+        <Googlemap onSaveTravelCost={handleSaveTravelCost} />
+      ) : (
+        <Googlemapcurrent onSaveTravelCost={handleSaveTravelCost} />
+      )}
 
       <PlanSelectionModal
         isOpen={showModal}
@@ -223,19 +250,20 @@ function TripPlanner() {
         onClose={() => setIsModalOpen(false)}
         travelCost={travelCost}
       />
-      
+
+      {isAuthenticated && selectedPlan && (
         <button
           className="fixed bottom-8 right-8 bg-orange-500 text-white p-6 rounded-full shadow-lg hover:bg-orange-600 duration-200 animate-bounce z-[1000]"
           onClick={() => setIsModalOpen(true)}
         >
           <FaMap className="text-2xl" />
           {travelCost !== null && (
-          <span className="absolute -top-2 -right-0 bg-red-500 text-white text-lg  rounded-full w-6 h-6 flex items-center justify-center">
-            !
-          </span>
-        )}
+            <span className="absolute -top-2 -right-0 bg-red-500 text-white text-lg rounded-full w-6 h-6 flex items-center justify-center">
+              !
+            </span>
+          )}
         </button>
-      
+      )}
 
       {!isAuthenticated && (
         <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-60 flex flex-col items-center justify-center ">

@@ -3,7 +3,8 @@ import { useToast } from "../component/ToastComponent";
 import { useTranslation } from "react-i18next";
 import { AnimatePresence, motion } from "framer-motion";
 
-const GoogleMapTest = ({ onSaveTravelCost }) => {
+const GoogleMapCurrent = ({ onSaveTravelCost }) => {
+  // เพิ่ม props onSaveTravelCost
   const [map, setMap] = useState(null);
   const [markers, setMarkers] = useState([]);
   const [directionsService, setDirectionsService] = useState(null);
@@ -12,11 +13,9 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
   const [currentPosition, setCurrentPosition] = useState(null);
   const [locations, setLocations] = useState([]);
   const [selectedLocations, setSelectedLocations] = useState([]);
-  const [selectedStartLocation, setSelectedStartLocation] = useState(null);
   const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isPlanValid, setIsPlanValid] = useState(true);
-  const { ToastComponent, showToast } = useToast();
 
   const userIdString = localStorage.getItem("userID");
   const userId = userIdString ? parseInt(userIdString, 10) : null;
@@ -66,7 +65,6 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
 
         setLocations(locationsArray);
         setSelectedLocations(locationsArray.map((loc) => loc.locationId));
-        setSelectedStartLocation(locationsArray[0]?.locationId || null);
       } catch (error) {
         console.error("Error fetching plan details:", error);
       }
@@ -141,12 +139,6 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
   }, [map, isPlanValid]);
 
   const handleLocationSelect = (locationId) => {
-    // ถ้า location นี้เป็น startLocation และกำลังจะยกเลิก checkbox
-    if (selectedStartLocation === locationId && selectedLocations.includes(locationId)) {
-      showToast("ไม่สามารถยกเลิก checkbox ได้หาก radio ถูกเลือก");
-      return;
-    }
-
     setSelectedLocations((prevSelected) =>
       prevSelected.includes(locationId)
         ? prevSelected.filter((id) => id !== locationId)
@@ -154,25 +146,16 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
     );
   };
 
-  const handleStartLocationSelect = (locationId) => {
-    // ถ้า location นี้ยังไม่ถูกเลือกใน checkbox
-    if (!selectedLocations.includes(locationId)) {
-      showToast("กรุณาเลือก checkbox ก่อนเลือก radio");
-      return;
-    }
-
-    setSelectedStartLocation(locationId);
-  };
-
   const calculateRoutes = () => {
     if (
       !directionsService ||
       !directionsRenderer ||
+      !currentPosition ||
       selectedLocations.length < 1 ||
       !isPlanValid
     ) {
       console.error(
-        "Directions service or renderer not initialized, or no locations selected."
+        "Directions service or renderer not initialized, or no current position."
       );
       return;
     }
@@ -181,7 +164,6 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
     setMarkers([]);
 
     const waypoints = selectedLocations
-      .filter((locationId) => locationId !== selectedStartLocation)
       .map((locationId) => {
         const loc = locations.find((l) => l.locationId === locationId);
         return loc
@@ -193,25 +175,14 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
       })
       .filter((loc) => loc !== null);
 
-    const startLocation = locations.find(
-      (loc) => loc.locationId === selectedStartLocation
-    );
-    const origin = startLocation
-      ? { lat: startLocation.latitude, lng: startLocation.longitude }
-      : null;
-
-    const destination = waypoints[waypoints.length - 1]?.location || origin;
-
-    if (!origin || !destination) {
-      console.error("No valid origin or destination.");
-      return;
-    }
+    const origin = { lat: currentPosition.lat, lng: currentPosition.lng };
+    const destination = waypoints[0]?.location || origin;
 
     directionsService.route(
       {
         origin,
         destination,
-        waypoints: waypoints.slice(0, -1),
+        waypoints: waypoints.slice(1),
         travelMode: window.google.maps.TravelMode.DRIVING,
         provideRouteAlternatives: true,
       },
@@ -226,9 +197,43 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
     );
   };
 
+  const getCurrentPosition = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const pos = {
+            lat: parseFloat(position.coords.latitude),
+            lng: parseFloat(position.coords.longitude),
+          };
+          setCurrentPosition(pos);
+
+          markers.forEach((marker) => {
+            if (marker.getTitle() === "ตำแหน่งปัจจุบัน") {
+              marker.setMap(null);
+            }
+          });
+
+          const currentMarker = new window.google.maps.Marker({
+            position: pos,
+            map,
+            title: "ตำแหน่งปัจจุบัน",
+            icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+          });
+
+          setMarkers((prevMarkers) => [...prevMarkers, currentMarker]);
+          map.setCenter(pos);
+        },
+        () => {
+          console.error("Error: The Geolocation service failed.");
+        }
+      );
+    } else {
+      console.error("Error: Your browser doesn't support geolocation.");
+    }
+  };
+
   return (
     <div>
-      {ToastComponent}
       <div className="font-kanit flex flex-col items-center">
         {!isPlanValid ? (
           <div className="text-center mt-40">
@@ -271,14 +276,6 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
                           onChange={() => handleLocationSelect(loc.locationId)}
                           className="mr-2 border-2"
                         />
-                        <input
-                          type="radio"
-                          name="startLocation"
-                          checked={selectedStartLocation === loc.locationId}
-                          onChange={() => handleStartLocationSelect(loc.locationId)}
-                          className="mr-2 border-2"
-                          disabled={!selectedLocations.includes(loc.locationId)} // ปิด radio ถ้า checkbox ไม่ถูกเลือก
-                        />
                         <img
                           src={loc.imageUrl}
                           alt={loc.name}
@@ -294,10 +291,17 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
 
             <div className="flex gap-4 mb-6">
               <button
+                onClick={getCurrentPosition}
+                className="mb-4 px-5 py-3 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition"
+              >
+                ตำแหน่งปัจจุบัน
+              </button>
+
+              <button
                 onClick={calculateRoutes}
-                disabled={selectedLocations.length === 0}
+                disabled={!currentPosition}
                 className={`mb-4 px-5 py-3 rounded-lg shadow-md transition ${
-                  selectedLocations.length > 0
+                  currentPosition
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "bg-gray-400 text-gray-200 cursor-not-allowed"
                 }`}
@@ -310,7 +314,7 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
               routes={routes}
               locations={locations}
               planId={selectedPlan}
-              onSaveTravelCost={onSaveTravelCost}
+              onSaveTravelCost={onSaveTravelCost} // ส่ง callback function ไปยัง RouteInfo
             />
           </>
         )}
@@ -318,8 +322,6 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
     </div>
   );
 };
-
-// ส่วนของ RouteInfo เหมือนเดิม
 
 const RouteInfo = ({ routes, locations, planId, onSaveTravelCost }) => {
   const [fuelEfficiency, setFuelEfficiency] = useState(4);
@@ -337,6 +339,7 @@ const RouteInfo = ({ routes, locations, planId, onSaveTravelCost }) => {
     }
     showToast("บันทึกค่าใช้จ่ายน้ำมันสำเร็จ!");
 
+    // ส่งค่าเดินทางไปยัง parent component
     if (onSaveTravelCost) {
       onSaveTravelCost(totalFuelCost);
     }
@@ -433,4 +436,4 @@ const RouteInfo = ({ routes, locations, planId, onSaveTravelCost }) => {
   );
 };
 
-export default GoogleMapTest;
+export default GoogleMapCurrent;

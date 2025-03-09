@@ -169,8 +169,8 @@ const Cafepage = () => {
                           ({averageScore.toFixed(1) || 0})
                         </span>
                       </div>
-                      <span className="text-gray-800 font-bold">
-                        ฿{stay.price.toLocaleString()}
+                      <span className="text-gray-800 text-sm font-bold">
+                        ราคาที่พักต่อคืน : ฿{stay.price.toLocaleString()}
                       </span>
                     </div>
                     <p className="text-gray-600 mt-3 text-sm leading-relaxed">
