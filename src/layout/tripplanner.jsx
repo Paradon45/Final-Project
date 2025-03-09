@@ -222,7 +222,7 @@ function TripPlanner() {
             className="bg-orange-500 text-white p-4 rounded-full shadow-lg hover:bg-orange-600 duration-200"
             onClick={() => setShowGoogleMap(!showGoogleMap)}
           >
-            {showGoogleMap ? "นำทางจากที่อยู่ปัจจุบัน" : "นำทางจากสถานที่"}
+            {showGoogleMap ? "ค้นหาเส้นทางจากที่อยู่ปัจจุบัน" : "ค้นหาเส้นทางจากสถานที่"}
           </button>
         </div>
       )}

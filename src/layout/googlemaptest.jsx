@@ -143,7 +143,7 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
   const handleLocationSelect = (locationId) => {
     // ถ้า location นี้เป็น startLocation และกำลังจะยกเลิก checkbox
     if (selectedStartLocation === locationId && selectedLocations.includes(locationId)) {
-      showToast("ไม่สามารถยกเลิก checkbox ได้หาก radio ถูกเลือก");
+      showToast("ไม่สามารถยกเลิกได้เนื่องจากจุดเริ่มต้นถูกเลือก");
       return;
     }
 
@@ -258,7 +258,7 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
                   {locations.map((loc, index) => (
                     <motion.div
                       key={index}
-                      className="flex-none w-80 bg-gray-50 p-3 rounded-lg shadow"
+                      className="flex-none w-6/12 bg-gray-50 p-3 rounded-lg shadow"
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
@@ -271,6 +271,9 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
                           onChange={() => handleLocationSelect(loc.locationId)}
                           className="mr-2 border-2"
                         />
+                        <p className="text-gray-400 text-xs">
+                        เลือกจุดเริ่ม:
+                        </p>
                         <input
                           type="radio"
                           name="startLocation"
@@ -335,7 +338,7 @@ const RouteInfo = ({ routes, locations, planId, onSaveTravelCost }) => {
       console.error("No planId provided.");
       return;
     }
-    showToast("บันทึกค่าใช้จ่ายน้ำมันสำเร็จ!");
+    showToast("บันทึกค่าเดินทางสำเร็จ!");
 
     if (onSaveTravelCost) {
       onSaveTravelCost(totalFuelCost);
