@@ -77,9 +77,12 @@ const AddLocationPageAdmin = () => {
         const errorMessage =
           response.status === 500
             ? "เกิดข้อผิดพลาดในระบบ"
-            : "เพิ่มสถานที่ไม่สำเร็จ";
+            : "เพิ่มสถานที่ไม่สำเร็จ !";
         setError(errorMessage);
         showToast("เพิ่มสถานที่ไม่สำเร็จ");
+        if(response.status === 400){
+          showToast("มีสถานที่นี้อยู่แล้ว");
+        }
         throw new Error(errorMessage);
       }
 

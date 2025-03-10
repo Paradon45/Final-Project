@@ -138,7 +138,7 @@ const Profile = () => {
             </h3>
             <div className="text-lg text-gray-600 space-y-2">
               <p>
-                <strong>{t("budget")} :</strong>{" "}
+                <strong>{t("total_budget")} :</strong>{" "}
                 {selectedPlan.budget ? `฿${selectedPlan.budget.toLocaleString()}` : "N/A"}
               </p>
               <p>

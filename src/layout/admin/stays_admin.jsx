@@ -57,7 +57,16 @@ const CafeDetail = () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
+  const calculateAverageScore = (locationScore) => {
+    if (!locationScore || locationScore.length === 0) return 0;
+
+    const totalScore = locationScore.reduce((sum, score) => sum + score.score, 0);
+    return totalScore / locationScore.length;
+  };
+
   const { name, description, locationImg, address, phone, date, map, locationScore } = location;
+  const averageScore = calculateAverageScore(locationScore);
+
 
   return (
     <div className="bg-gray-100 font-kanit min-h-screen">
@@ -105,7 +114,7 @@ const CafeDetail = () => {
           </div>
           <div className="flex items-center mt-6">
             <FaStar className="text-yellow-500 text-2xl" />
-            <p className="ml-2 text-xl font-bold text-gray-800">({locationScore[0]?.score || 0}.0)</p>
+            <p className="ml-2 text-xl font-bold text-gray-800">({averageScore.toFixed(1) || 0})</p>
             <span className="text-gray-500 text-lg ml-2">/ 5.0</span>
           </div>
         </div>

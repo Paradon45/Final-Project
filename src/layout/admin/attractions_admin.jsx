@@ -71,15 +71,7 @@ const Attractions = () => {
 
       <section className="bg-white py-12">
         <div className="container mx-auto px-4">
-        {!loading && !error && (
-          <Link to={`/landing`}>
-            <div className="text-right mr-6">
-              <button className="px-4 py-2 bg-gray-300 hover:bg-yellow-500 transition duration-300 text-gray-800 font-semibold rounded shadow animate-fadeIn3Delay1">
-                {t("locations")}
-              </button>
-            </div>
-          </Link>
-          )}
+        
           {loading && (
             <p className="text-xl font-bold text-center">{t("loading")}</p>
           )}

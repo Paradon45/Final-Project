@@ -67,8 +67,6 @@ const NavbarAdmin = () => {
               "attractionadmin",
               "cafepageadmin",
               "staypageadmin",
-              "recommendadmin",
-              "planadmin",
             ].map((item) => (
               <li key={item}>
                 <Link
