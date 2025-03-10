@@ -52,12 +52,12 @@ const CafepageAdmin = () => {
 
   const handleFilterByRating = () => {
     setFilterByRating(!filterByRating);
-    const sortedStays = [...stays].sort((a, b) => {
+    const sortedStays = [...cafes].sort((a, b) => {
       const scoreA = calculateAverageScore(a.locationScore);
       const scoreB = calculateAverageScore(b.locationScore);
       return filterByRating ? scoreA - scoreB : scoreB - scoreA;
     });
-    setStays(sortedStays);
+    setCafes(sortedStays);
   };
 
   return (
