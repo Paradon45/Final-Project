@@ -2,20 +2,27 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FaMap } from "react-icons/fa";
 import { useToast } from "../component/ToastComponent";
-import { Drawer, Button } from "antd"; // Import Drawer และ Button จาก Ant Design
+import { Drawer, Button, DatePicker } from "antd"; // Import DatePicker จาก Ant Design
 import AddedPlacesModal from "../component/addedplaces"; // นำเข้า AddedPlacesModal
 
 const SearchSection = ({ onSearch }) => {
   const [budget, setBudget] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [dateRange, setDateRange] = useState([]); // State สำหรับเก็บวันที่ไปและวันที่กลับ
   const { t } = useTranslation();
 
   const handleSearch = () => {
-    onSearch({ budget, categoryId });
+    const [startDate, endDate] = dateRange;
+    onSearch({
+      budget,
+      categoryId,
+      startDate: startDate ? startDate.format("YYYY-MM-DD") : null, // ฟอร์แมตวันที่ให้เป็น "YYYY-MM-DD"
+      endDate: endDate ? endDate.format("YYYY-MM-DD") : null, // ฟอร์แมตวันที่ให้เป็น "YYYY-MM-DD"
+    });
   };
 
   return (
-    <div className="animate-fadeInDelay2 font-kanit bg-white shadow-lg rounded-lg p-6 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-11 w-96 mx-auto">
+    <div className="animate-fadeInDelay2 font-kanit bg-white shadow-lg rounded-lg p-6 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-11 w-10/12 mx-auto">
       <select
         className="border p-2 rounded-md"
         value={budget}
@@ -39,6 +46,11 @@ const SearchSection = ({ onSearch }) => {
         <option value="5">{t("staypage")}</option>
         <option value="6">{t("others")}</option>
       </select>
+      {/* เพิ่ม DatePicker.RangePicker สำหรับเลือกวันที่ไปและวันที่กลับ */}
+      <DatePicker.RangePicker
+        onChange={(dates) => setDateRange(dates)} // เมื่อวันที่เปลี่ยนแปลง
+        format="YYYY-MM-DD" // ฟอร์แมตวันที่
+      />
       <button
         className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 duration-200"
         onClick={handleSearch}
