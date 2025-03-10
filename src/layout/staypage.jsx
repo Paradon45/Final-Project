@@ -13,7 +13,7 @@ const Cafepage = () => {
   const [selectedPlaces, setSelectedPlaces] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterByPrice, setFilterByPrice] = useState(false); // สถานะการกรองตามราคา
-  const [filterByRating, setFilterByRating] = useState(false); // สถานะการกรองตามคะแนน
+  const [filterByRating, setFilterByRating] = useState(true); // สถานะการกรองตามคะแนน
 
   const API_URL = import.meta.env.VITE_API_URL;
 

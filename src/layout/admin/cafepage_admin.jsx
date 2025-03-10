@@ -3,15 +3,15 @@ import { FaCoffee } from "react-icons/fa";
 import { GiForkKnifeSpoon } from "react-icons/gi";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { FaMap } from "react-icons/fa";
+import { FaFilter } from "react-icons/fa";
 
 const CafepageAdmin = () => {
   const { t } = useTranslation();
   const [cafes, setCafes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedPlaces, setSelectedPlaces] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filterByRating, setFilterByRating] = useState(true);
+
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
@@ -50,6 +50,16 @@ const CafepageAdmin = () => {
     return totalScore / locationScore.length;
   };
 
+  const handleFilterByRating = () => {
+    setFilterByRating(!filterByRating);
+    const sortedStays = [...stays].sort((a, b) => {
+      const scoreA = calculateAverageScore(a.locationScore);
+      const scoreB = calculateAverageScore(b.locationScore);
+      return filterByRating ? scoreA - scoreB : scoreB - scoreA;
+    });
+    setStays(sortedStays);
+  };
+
   return (
     <div>
       <div className="font-kanit bg-gradient-to-b from-gray-200 to-white animate-fadeIn max-w-7xl mx-auto p-8 md:p-16">
@@ -59,6 +69,20 @@ const CafepageAdmin = () => {
             <FaCoffee className="text-orange-500 ml-2 mt-1 hover:text-yellow-500 transition duration-300" />
           </h2>
           <div className="animate-fadeInDelay1 w-20 h-1 bg-orange-500 mx-auto rounded-lg"></div>
+        </div>
+
+        <div className="flex justify-end gap-4 mb-8">
+          <button
+            onClick={handleFilterByRating}
+            className={`flex items-center px-4 py-2 rounded-lg shadow-md transition duration-300 ${
+              filterByRating
+                ? "bg-orange-500 text-white"
+                : "bg-white text-gray-800"
+            }`}
+          >
+            <FaFilter className="mr-2" />
+            {filterByRating ? "คะแนนสูง-ต่ำ" : "คะแนนต่ำ-สูง"}
+          </button>
         </div>
 
         {loading && (
