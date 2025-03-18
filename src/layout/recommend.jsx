@@ -117,7 +117,7 @@ const SeeMorePage = () => {
         }
 
         const data = await response.json();
-        setPlans(data.plan || []);
+        setPlans(data.plans || []);
       } catch (error) {
         console.error("Error fetching user plans:", error);
       }
