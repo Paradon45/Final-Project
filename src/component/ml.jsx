@@ -22,7 +22,7 @@ const SearchSection = ({ onSearch }) => {
   };
 
   return (
-    <div className="animate-fadeInDelay2 font-kanit bg-white shadow-lg rounded-lg p-6 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-11 w-10/12 mx-auto">
+    <div className="animate-fadeInDelay2 font-kanit bg-white shadow-lg rounded-lg p-6 flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-11 w-auto mx-auto">
       <select
         className="border p-2 rounded-md"
         value={budget}
@@ -152,7 +152,7 @@ const ML = ({ isOpen, onClose }) => {
         onClose={onClose}
         className="font-kanit"
         open={isOpen}
-        width={800}
+        width={1000}
         footer={
           <div className="flex justify-end">
             <Button onClick={onClose} className="mr-2 font-kanit">
