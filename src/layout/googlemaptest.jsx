@@ -13,6 +13,8 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
   const [locations, setLocations] = useState([]);
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [selectedStartLocation, setSelectedStartLocation] = useState(null);
+  const [selectedDay, setSelectedDay] = useState(null); // เพิ่ม state สำหรับวันที่ที่เลือก
+  const [planDays, setPlanDays] = useState([]); // เพิ่ม state สำหรับข้อมูลวันทั้งหมด
   const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isPlanValid, setIsPlanValid] = useState(true);
@@ -56,13 +58,22 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
 
         setIsPlanValid(true);
 
-        const locationsArray = plan.plan_location.map((loc) => ({
-          locationId: loc.locationId,
-          name: loc.location.name,
-          latitude: parseFloat(loc.location.latitude),
-          longitude: parseFloat(loc.location.longitude),
-          imageUrl: loc.location.locationImg[0]?.url || "",
-        }));
+        // เก็บข้อมูลวันทั้งหมด
+        setPlanDays(plan.planDays);
+
+        // กรองสถานที่ตามวันที่ที่เลือก
+        const selectedDayData = plan.planDays.find(
+          (day) => day.day === selectedDay
+        );
+        const locationsArray = selectedDayData
+          ? selectedDayData.locations.map((loc) => ({
+              locationId: loc.locationId,
+              name: loc.location.name,
+              latitude: parseFloat(loc.location.latitude),
+              longitude: parseFloat(loc.location.longitude),
+              imageUrl: loc.location.locationImg[0]?.url || "",
+            }))
+          : [];
 
         setLocations(locationsArray);
         setSelectedLocations(locationsArray.map((loc) => loc.locationId));
@@ -73,7 +84,7 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
     };
 
     if (selectedPlan) fetchPlanDetails();
-  }, [selectedPlan, API_URL, userId]);
+  }, [selectedPlan, selectedDay, API_URL, userId]);
 
   useEffect(() => {
     const initMap = () => {
@@ -141,8 +152,10 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
   }, [map, isPlanValid]);
 
   const handleLocationSelect = (locationId) => {
-    // ถ้า location นี้เป็น startLocation และกำลังจะยกเลิก checkbox
-    if (selectedStartLocation === locationId && selectedLocations.includes(locationId)) {
+    if (
+      selectedStartLocation === locationId &&
+      selectedLocations.includes(locationId)
+    ) {
       showToast("ไม่สามารถยกเลิกได้เนื่องจากจุดเริ่มต้นถูกเลือก");
       return;
     }
@@ -155,7 +168,6 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
   };
 
   const handleStartLocationSelect = (locationId) => {
-    // ถ้า location นี้ยังไม่ถูกเลือกใน checkbox
     if (!selectedLocations.includes(locationId)) {
       showToast("กรุณาเลือก checkbox ก่อนเลือก radio");
       return;
@@ -238,6 +250,24 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
           </div>
         ) : (
           <>
+            {/* Dropdown เลือกวัน */}
+            <div className="w-48 mt-5">
+              <select
+                value={selectedDay || ""}
+                onChange={(e) => setSelectedDay(parseInt(e.target.value))}
+                className="w-full p-2 border rounded-lg font-kanit"
+              >
+                <option value="" disabled>
+                  {t("select_day")}
+                </option>
+                {planDays.map((day) => (
+                  <option key={day.id} value={day.day}>
+                    {t("day")} {day.day}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div
               id="map"
               style={{
@@ -271,16 +301,14 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
                           onChange={() => handleLocationSelect(loc.locationId)}
                           className="mr-2 border-2"
                         />
-                        <p className="text-gray-400 text-xs">
-                        เลือกจุดเริ่ม:
-                        </p>
+                        <p className="text-gray-400 text-xs">เลือกจุดเริ่ม:</p>
                         <input
                           type="radio"
                           name="startLocation"
                           checked={selectedStartLocation === loc.locationId}
                           onChange={() => handleStartLocationSelect(loc.locationId)}
                           className="mr-2 border-2"
-                          disabled={!selectedLocations.includes(loc.locationId)} // ปิด radio ถ้า checkbox ไม่ถูกเลือก
+                          disabled={!selectedLocations.includes(loc.locationId)}
                         />
                         <img
                           src={loc.imageUrl}
@@ -322,8 +350,6 @@ const GoogleMapTest = ({ onSaveTravelCost }) => {
   );
 };
 
-// ส่วนของ RouteInfo เหมือนเดิม
-
 const RouteInfo = ({ routes, locations, planId, onSaveTravelCost }) => {
   const [fuelEfficiency, setFuelEfficiency] = useState(4);
   const { ToastComponent, showToast } = useToast();
@@ -357,14 +383,14 @@ const RouteInfo = ({ routes, locations, planId, onSaveTravelCost }) => {
 
         <div className="mb-6">
           <label className="block text-gray-700 font-medium mb-2 text-lg">
-            อัตราสิ้นเปลือง :
+          อัตราสิ้นเปลือง (กม./บาท) :
           </label>
           <input
             type="number"
             value={fuelEfficiency}
             onChange={(e) => setFuelEfficiency(parseFloat(e.target.value))}
-            className="p-2 border rounded w-full text-lg"
-            min="1"
+            className="ml-5 p-2 border rounded w-14 text-lg"
+            min="0.1"
             step="0.1"
           />
         </div>

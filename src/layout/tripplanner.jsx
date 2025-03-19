@@ -8,6 +8,9 @@ import Googlemap from "./googlemaptest";
 import Googlemapcurrent from "./googlemapcurrent";
 import PlanSelectionModal from "../component/PlanSelectionModal";
 import AddedBudgetModal from "../component/addedbudget";
+import { Select } from "antd"; // นำเข้า Select จาก Ant Design
+
+const { Option } = Select;
 
 function TripPlanner() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -23,14 +26,17 @@ function TripPlanner() {
     const storedShowGoogleMap = localStorage.getItem("showGoogleMap");
     return storedShowGoogleMap ? JSON.parse(storedShowGoogleMap) : true;
   });
+  const [selectedDay, setSelectedDay] = useState(null); // เพิ่ม state สำหรับเลือกวัน
+  const [planDays, setPlanDays] = useState([]); // เพิ่ม state สำหรับเก็บข้อมูลวัน
 
   const userIdString = localStorage.getItem("userID");
   const userId = userIdString ? parseInt(userIdString, 10) : null;
 
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // ดึงข้อมูลแผนการเดินทางและวัน
   useEffect(() => {
-    const fetchPlans = async () => {
+    const fetchPlanAndDays = async () => {
       if (!selectedPlan) return;
 
       try {
@@ -55,20 +61,28 @@ function TripPlanner() {
         }
 
         setIsPlanValid(true);
-        const locations = data.plan.plan_location.map((loc) => ({
-          locationId: loc.locationId,
-          name: loc.location.name,
-          imageUrl: loc.location.locationImg[0]?.url || "",
-        }));
-        setLocationPlans(locations);
+        setPlanDays(data.plan.planDays); // เก็บข้อมูลวัน
         setSelectedPlanName(data.plan.name);
+
+        // กรองสถานที่ตามวันที่เลือก
+        const selectedDayData = data.plan.planDays.find(
+          (day) => day.day === selectedDay
+        );
+        const locations = selectedDayData
+          ? selectedDayData.locations.map((loc) => ({
+              locationId: loc.locationId,
+              name: loc.location.name,
+              imageUrl: loc.location.locationImg[0]?.url || "",
+            }))
+          : [];
+        setLocationPlans(locations);
       } catch (error) {
         console.error("Error fetching plan locations:", error);
       }
     };
 
-    fetchPlans();
-  }, [selectedPlan]);
+    fetchPlanAndDays();
+  }, [selectedPlan, selectedDay]); // เพิ่ม selectedDay เป็น dependency
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -93,11 +107,22 @@ function TripPlanner() {
     localStorage.setItem("showGoogleMap", JSON.stringify(showGoogleMap));
   }, [showGoogleMap]);
 
+  // ฟังก์ชันลบสถานที่
   const handleDeleteLocation = async (locationId) => {
+    if (!selectedDay) {
+      alert("กรุณาเลือกวันที่ก่อน");
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
+      const planDayId = planDays.find((day) => day.day === selectedDay)?.id; // หา planDayId จากวันที่เลือก
+      if (!planDayId) {
+        throw new Error("Plan Day ID not found");
+      }
+
       const response = await fetch(
-        `${API_URL}/plan/${selectedPlan}/plan_location/${locationId}`,
+        `${API_URL}/plan/${selectedPlan}/planDays/${planDayId}/locations/${locationId}`,
         {
           method: "DELETE",
           headers: {
@@ -117,7 +142,7 @@ function TripPlanner() {
       );
 
       showToast("ลบสถานที่สำเร็จ!");
-      window.location.reload();
+      window.location.reload(); // Reload หน้าเพื่ออัปเดตข้อมูล
     } catch (error) {
       console.error("Error deleting location:", error);
       showToast("เกิดข้อผิดพลาดในการลบสถานที่");
@@ -151,6 +176,25 @@ function TripPlanner() {
             >
               {t("openselect_plan")}
             </button>
+          </div>
+        )}
+
+        {/* เลือกวัน */}
+        {planDays.length > 0 && (
+          <div className="mb-4 w-48">
+            <Select
+              placeholder={t("select_day")}
+              onChange={(value) => {
+                setSelectedDay(value);
+              }}
+              className="w-full font-kanit"
+            >
+              {planDays.map((day) => (
+                <Option key={day.id} value={day.day} className="font-kanit">
+                  {t("day")} {day.day}
+                </Option>
+              ))}
+            </Select>
           </div>
         )}
 

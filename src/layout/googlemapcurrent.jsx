@@ -16,6 +16,8 @@ const GoogleMapCurrent = ({ onSaveTravelCost }) => {
   const { t } = useTranslation();
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [isPlanValid, setIsPlanValid] = useState(true);
+  const [selectedDay, setSelectedDay] = useState(null); // เก็บวันที่ที่เลือก
+  const [planDays, setPlanDays] = useState([]); // เก็บข้อมูลวันทั้งหมด
 
   const userIdString = localStorage.getItem("userID");
   const userId = userIdString ? parseInt(userIdString, 10) : null;
@@ -55,23 +57,33 @@ const GoogleMapCurrent = ({ onSaveTravelCost }) => {
 
         setIsPlanValid(true);
 
-        const locationsArray = plan.plan_location.map((loc) => ({
-          locationId: loc.locationId,
-          name: loc.location.name,
-          latitude: parseFloat(loc.location.latitude),
-          longitude: parseFloat(loc.location.longitude),
-          imageUrl: loc.location.locationImg[0]?.url || "",
-        }));
+        // เก็บข้อมูลวันทั้งหมด
+        setPlanDays(plan.planDays);
+
+        // กรองสถานที่ตามวันที่ที่เลือก
+        const selectedDayData = plan.planDays.find(
+          (day) => day.day === selectedDay
+        );
+        const locationsArray = selectedDayData
+          ? selectedDayData.locations.map((loc) => ({
+              locationId: loc.locationId,
+              name: loc.location.name,
+              latitude: parseFloat(loc.location.latitude),
+              longitude: parseFloat(loc.location.longitude),
+              imageUrl: loc.location.locationImg[0]?.url || "",
+            }))
+          : [];
 
         setLocations(locationsArray);
         setSelectedLocations(locationsArray.map((loc) => loc.locationId));
+        setSelectedStartLocation(locationsArray[0]?.locationId || null);
       } catch (error) {
         console.error("Error fetching plan details:", error);
       }
     };
 
     if (selectedPlan) fetchPlanDetails();
-  }, [selectedPlan, API_URL, userId]);
+  }, [selectedPlan, selectedDay, API_URL, userId]); // เพิ่ม selectedDay เป็น dependency
 
   useEffect(() => {
     const initMap = () => {
@@ -112,7 +124,7 @@ const GoogleMapCurrent = ({ onSaveTravelCost }) => {
   }, []);
 
   useEffect(() => {
-    if (map && locations.length > 0 && isPlanValid) {
+    if (map && locations.length > 0 && isPlanValid && selectedDay) {
       markers.forEach((marker) => marker.setMap(null));
       setMarkers([]);
 
@@ -129,7 +141,7 @@ const GoogleMapCurrent = ({ onSaveTravelCost }) => {
 
       setMarkers(newMarkers);
     }
-  }, [map, locations, selectedLocations, isPlanValid]);
+  }, [map, locations, selectedLocations, isPlanValid,selectedDay]);
 
   useEffect(() => {
     if (map && isPlanValid) {
@@ -243,6 +255,22 @@ const GoogleMapCurrent = ({ onSaveTravelCost }) => {
           </div>
         ) : (
           <>
+            <div className="mt-5 w-48">
+              <select
+                value={selectedDay || ""}
+                onChange={(e) => setSelectedDay(parseInt(e.target.value))}
+                className="w-full p-2 border rounded-lg font-kanit"
+              >
+                <option value="" disabled>
+                  {t("select_day")}
+                </option>
+                {planDays.map((day) => (
+                  <option key={day.id} value={day.day}>
+                    {t("day")} {day.day}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div
               id="map"
               style={{
@@ -357,13 +385,13 @@ const RouteInfo = ({ routes, locations, planId, onSaveTravelCost }) => {
 
         <div className="mb-6">
           <label className="block text-gray-700 font-medium mb-2 text-lg">
-            อัตราสิ้นเปลือง :
+            อัตราสิ้นเปลือง (กม./บาท) :
           </label>
           <input
             type="number"
             value={fuelEfficiency}
             onChange={(e) => setFuelEfficiency(parseFloat(e.target.value))}
-            className="p-2 border rounded w-full text-lg"
+            className="ml-5 p-2 border rounded w-14 text-lg"
             min="1"
             step="0.1"
           />

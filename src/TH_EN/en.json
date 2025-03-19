@@ -146,6 +146,7 @@
     "start_date": "Start Date",
     "end_date": "End Date",
     "update_plan": "Update Plan",
+    "select_day": "Select Day",
     "total_budget": "Total Budget"
   }
   

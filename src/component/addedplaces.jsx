@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Drawer, Button, Checkbox } from "antd"; // นำเข้า Drawer, Button, และ Checkbox จาก Ant Design
+import { Drawer, Button, Checkbox, Select, message } from "antd"; // นำเข้า Select จาก Ant Design
 import { FaTrash } from "react-icons/fa";
+
+const { Option } = Select;
 
 const AddedPlacesModal = ({
   isOpen,
@@ -15,20 +17,47 @@ const AddedPlacesModal = ({
   const navigate = useNavigate();
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // State สำหรับเก็บสถานที่ที่ถูกเลือก
   const [checkedPlaces, setCheckedPlaces] = useState([]);
-  // State สำหรับเก็บสถานะการเลือกทั้งหมด
   const [selectAll, setSelectAll] = useState(false);
-
   const [totalPrice, setTotalPrice] = useState(0);
+  const [planDays, setPlanDays] = useState([]);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedPlanId, setSelectedPlanId] = useState(localStorage.getItem("selectedPlanId"));
 
-  // คำนวณราคารวมทุกครั้งที่ checkedPlaces เปลี่ยนแปลง
+  // อัปเดต selectedPlanId เมื่อมีการเปลี่ยนแปลงใน localStorage
+  useEffect(() => {
+    const planId = localStorage.getItem("selectedPlanId");
+    if (planId !== selectedPlanId) {
+      setSelectedPlanId(planId);
+    }
+  }, [localStorage.getItem("selectedPlanId")]);
+
+  // ดึงข้อมูล planDays เมื่อ selectedPlanId หรือ isOpen เปลี่ยนแปลง
+  useEffect(() => {
+    const fetchPlanDays = async () => {
+      if (!selectedPlanId) return;
+
+      try {
+        const response = await fetch(`${API_URL}/plan/${selectedPlanId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch plan details");
+        }
+        const data = await response.json();
+        // ดึงข้อมูล planDays จาก response
+        setPlanDays(data.plan.planDays);
+      } catch (error) {
+        console.error("Error fetching plan days:", error);
+      }
+    };
+
+    fetchPlanDays();
+  }, [API_URL, selectedPlanId, isOpen]);
+
   useEffect(() => {
     const total = checkedPlaces.reduce((sum, place) => sum + (place?.price || 0), 0);
     setTotalPrice(total);
   }, [checkedPlaces]);
 
-  // ฟังก์ชันสำหรับจัดการการเลือกหรือยกเลิกสถานที่
   const handleCheckboxChange = (place, checked) => {
     if (checked) {
       setCheckedPlaces([...checkedPlaces, place]);
@@ -37,7 +66,6 @@ const AddedPlacesModal = ({
     }
   };
 
-  // ฟังก์ชันสำหรับเลือกหรือยกเลิกทั้งหมด
   const handleSelectAll = (checked) => {
     if (checked) {
       setCheckedPlaces(selectedPlaces);
@@ -48,6 +76,11 @@ const AddedPlacesModal = ({
   };
 
   const handleConfirm = async () => {
+    if (!selectedDay) {
+      message.error(t("กรุณาเลือกวันที่ก่อน"));
+      return;
+    }
+
     const locationIds = checkedPlaces.map((place) => place.locationId);
     const selectedPlanId = localStorage.getItem("selectedPlanId");
     const selectedPlanID = parseInt(selectedPlanId, 10);
@@ -64,8 +97,9 @@ const AddedPlacesModal = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          locationId: locationIds,
           planId: selectedPlanID,
+          planDayId: selectedDay, // ใช้ planDayId ที่ผู้ใช้เลือก
+          locationIds: locationIds,
         }),
       });
 
@@ -76,7 +110,6 @@ const AddedPlacesModal = ({
       const data = await response.json();
       console.log("Plan saved successfully", data);
 
-      // นำทางไปที่ /plans
       navigate("/plans");
     } catch (error) {
       console.error("Error:", error);
@@ -114,20 +147,35 @@ const AddedPlacesModal = ({
       }
     >
       <div className="flex flex-col h-full">
-        {/* Checkbox เลือกทั้งหมด */}
         {selectedPlaces.length > 0 && (
-        <div className="mb-4">
-          <Checkbox
-            onChange={(e) => handleSelectAll(e.target.checked)}
-            className="font-kanit"
-            checked={selectAll}
-          >
-            {t("select_all")}
-          </Checkbox>
-        </div>
+          <div className="mb-4">
+            <Checkbox
+              onChange={(e) => handleSelectAll(e.target.checked)}
+              className="font-kanit"
+              checked={selectAll}
+            >
+              {t("select_all")}
+            </Checkbox>
+          </div>
         )}
 
-        {/* รายการสถานที่ */}
+        {/* แสดง Select component เฉพาะเมื่อมี selectedPlaces */}
+        {selectedPlaces.length > 0 && (
+          <div className="mb-4">
+            <Select
+              placeholder={t("select_day")}
+              onChange={(value) => setSelectedDay(value)}
+              className="w-full font-kanit"
+            >
+              {planDays.map((day) => (
+                <Option key={day.id} value={day.id} className="font-kanit">
+                  {t("day")} {day.day}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto">
           {selectedPlaces.length > 0 ? (
             selectedPlaces.map((place) => (
@@ -168,7 +216,6 @@ const AddedPlacesModal = ({
           )}
         </div>
 
-        {/* แสดงรายการสถานที่ที่ถูกเลือก */}
         {checkedPlaces.length > 0 && (
           <div className="mt-6 border-t pt-4">
             <h3 className="text-lg font-bold mb-2">{t("selected_places")}</h3>
@@ -183,7 +230,6 @@ const AddedPlacesModal = ({
           </div>
         )}
 
-        {/* แสดงราคารวม */}
         {checkedPlaces.length > 0 && (
           <div className="mt-6 border-t pt-4">
             <h3 className="text-lg font-bold">{t("total_price")}</h3>

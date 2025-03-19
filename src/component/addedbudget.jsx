@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { Drawer, Button, message, Tooltip } from "antd"; // นำเข้า Tooltip จาก Ant Design
+import { Drawer, Button, message, Tooltip, Select, List, Avatar } from "antd"; // นำเข้า Select, List, Avatar จาก Ant Design
 import { FaTrash } from "react-icons/fa";
+
+const { Option } = Select;
 
 const AddedBudgetModal = ({ isOpen, onClose, travelCost }) => {
   const { t } = useTranslation();
@@ -12,7 +14,9 @@ const AddedBudgetModal = ({ isOpen, onClose, travelCost }) => {
 
   const [plan, setPlan] = useState(null);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [isPlanValid, setIsPlanValid] = useState(true); // เพิ่ม state สำหรับตรวจสอบความถูกต้องของแผน
+  const [isPlanValid, setIsPlanValid] = useState(true);
+  const [selectedDay, setSelectedDay] = useState(null); // เพิ่ม state สำหรับเลือกวัน
+  const [dailyBudgets, setDailyBudgets] = useState({}); // เพิ่ม state สำหรับเก็บค่าใช้จ่ายของแต่ละวัน
 
   // ดึง userId จาก localStorage
   const userIdString = localStorage.getItem("userID");
@@ -59,31 +63,64 @@ const AddedBudgetModal = ({ isOpen, onClose, travelCost }) => {
       setPlan(planData);
 
       // คำนวณราคารวมของสถานที่
-      const total = planData.plan_location.reduce(
-        (sum, pl) => sum + (pl.location?.price || 0),
-        0
-      );
+      const total = planData.planDays.reduce((sum, day) => {
+        return (
+          sum +
+          day.locations.reduce((daySum, loc) => daySum + (loc.location?.price || 0), 0)
+        );
+      }, 0);
       setTotalPrice(total);
     } catch (error) {
       console.error("Error fetching plan:", error);
     }
   };
 
-  // คำนวณราคาทั้งหมด (รวมราคาสถานที่และค่าเดินทาง)
-  const calculateTotalBudget = () => {
+  // คำนวณค่าใช้จ่ายของแต่ละวัน (รวมค่าเดินทาง)
+  const calculateDailyBudget = (day) => {
     const travelCostValue = parseFloat(travelCost) || 0; // แปลงค่าเดินทางเป็นตัวเลข
-    return totalPrice + travelCostValue;
+    const dayLocations = plan?.planDays?.find((d) => d.day === day)?.locations || [];
+    const dayTotal = dayLocations.reduce((sum, loc) => sum + (loc.location?.price || 0), 0);
+    return dayTotal + travelCostValue; // รวมค่าเดินทาง
+  };
+
+  // ฟังก์ชันบันทึกค่าใช้จ่ายของแต่ละวัน
+  const handleSaveDailyBudget = () => {
+    if (!selectedDay) {
+      message.error("กรุณาเลือกวันที่ก่อน");
+      return;
+    }
+
+    const dailyBudget = calculateDailyBudget(selectedDay); // คำนวณค่าใช้จ่ายของวันที่เลือก
+    setDailyBudgets((prev) => ({
+      ...prev,
+      [selectedDay]: dailyBudget, // บันทึกค่าใช้จ่ายของวันที่เลือก
+    }));
+    message.success(`บันทึกค่าใช้จ่ายสำหรับวันที่ ${selectedDay} สำเร็จ`);
+  };
+
+  // ฟังก์ชันลบค่าใช้จ่ายของแต่ละวัน
+  const handleRemoveDailyBudget = (day) => {
+    setDailyBudgets((prev) => {
+      const updatedBudgets = { ...prev };
+      delete updatedBudgets[day]; // ลบค่าใช้จ่ายของวันที่เลือก
+      return updatedBudgets;
+    });
+    message.success(`ลบค่าใช้จ่ายสำหรับวันที่ ${day} สำเร็จ`);
+  };
+
+  // ฟังก์ชันรวมค่าใช้จ่ายทั้งหมด (รวมค่าเดินทาง)
+  const calculateTotalDailyBudgets = () => {
+    return Object.values(dailyBudgets).reduce((sum, budget) => sum + budget, 0);
   };
 
   // ฟังก์ชันอัพเดตค่า budget กลับไปยัง API
   const updateBudget = async () => {
+    const totalBudget = calculateTotalDailyBudgets(); // รวมค่าใช้จ่ายของทุกวัน
     const selectedPlanId = localStorage.getItem("selectedPlanId");
     if (!selectedPlanId) {
       console.error("Plan ID not found");
       return;
     }
-
-    const totalBudget = calculateTotalBudget(); // คำนวณราคาทั้งหมด
 
     try {
       const token = localStorage.getItem("token"); // ดึง Token จาก localStorage
@@ -94,7 +131,7 @@ const AddedBudgetModal = ({ isOpen, onClose, travelCost }) => {
           Authorization: `Bearer ${token}`, // เพิ่ม Token ใน Header
         },
         body: JSON.stringify({
-          budget: totalBudget, // ส่งราคาทั้งหมดไปยัง API
+          budget: parseFloat(totalBudget), // แปลงค่า budget เป็นตัวเลข
         }),
       });
 
@@ -104,7 +141,7 @@ const AddedBudgetModal = ({ isOpen, onClose, travelCost }) => {
 
       const data = await response.json();
       console.log("Budget updated successfully:", data);
-      message.success("บันทึกค่าใช้จ่ายสำเร็จ");
+      message.success("บันทึกค่าใช้จ่ายทั้งหมดสำเร็จ");
     } catch (error) {
       console.error("Error updating budget:", error);
       message.error("เกิดข้อผิดพลาดในการบันทึกค่าใช้จ่าย");
@@ -157,61 +194,72 @@ const AddedBudgetModal = ({ isOpen, onClose, travelCost }) => {
           </div>
         ) : (
           <>
-            {/* รายการสถานที่ */}
-            <div className="flex-1 overflow-y-auto">
-              {plan?.plan_location?.length > 0 ? (
-                plan.plan_location.map((pl) => (
-                  <AnimatePresence key={pl.location.locationId}>
-                    <motion.div
-                      className="flex items-center mb-4"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.4 }}
-                    >
-                      <div className="flex items-center flex-1">
-                        <img
-                          src={pl.location.locationImg[0]?.url || ""}
-                          alt={pl.location.name}
-                          className="w-24 h-24 object-cover rounded-md mr-3"
-                        />
-                        <div>
-                          <span className="text-gray-800">{pl.location.name}</span>
-                          <p className="text-gray-600">
-                            ฿{pl.location.price.toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-                ))
-              ) : (
-                <p className="text-gray-500">{t("no_added_places")}</p>
-              )}
+            {/* เลือกวัน */}
+            <div className="mb-4">
+              <Select
+                placeholder={t("select_day")}
+                onChange={(value) => setSelectedDay(value)}
+                className="w-full font-kanit"
+              >
+                {plan?.planDays?.map((day) => (
+                  <Option key={day.id} value={day.day} className="font-kanit">
+                    {t("day")} {day.day}
+                  </Option>
+                ))}
+              </Select>
             </div>
 
-            {/* แสดงราคารวมของสถานที่ */}
-            {plan?.plan_location?.length > 0 && (
-              <div className="mt-6 border-t pt-4">
-                <h3 className="text-lg font-bold">{t("total_price")}</h3>
-                <p className="text-xl text-green-600">฿{totalPrice.toLocaleString()}</p>
-              </div>
+            {/* ปุ่มบันทึกค่าใช้จ่ายของแต่ละวัน */}
+            {selectedDay && (
+              <Button
+                type="primary"
+                className="font-kanit mb-4"
+                onClick={handleSaveDailyBudget}
+              >
+                บันทึกค่าใช้จ่ายสำหรับวันที่ {selectedDay}
+              </Button>
             )}
 
-            {/* แสดงค่าเดินทาง */}
-            {travelCost !== null && (
-              <div className="mt-6 border-t pt-4">
-                <h3 className="text-lg font-bold">{t("travel_cost")}</h3>
-                <p className="text-xl text-blue-600">฿{travelCost}</p>
-              </div>
+            {/* แสดงรายละเอียดของสถานที่ในแต่ละวัน */}
+            {selectedDay && (
+              <List
+                itemLayout="horizontal"
+                dataSource={plan?.planDays?.find((d) => d.day === selectedDay)?.locations || []}
+                renderItem={(location) => (
+                  <List.Item>
+                    <List.Item.Meta
+                      className="font-kanit"
+                      avatar={<Avatar src={location.location?.locationImg[0].url} />}
+                      title={location.location?.name}
+                      description={`฿${location.location?.price.toLocaleString()}`}
+                    />
+                  </List.Item>
+                )}
+              />
             )}
 
-            {/* แสดงราคาทั้งหมด (รวมราคาสถานที่และค่าเดินทาง) */}
-            {travelCost !== null && (
+            {/* แสดงค่าใช้จ่ายของแต่ละวัน (รวมค่าเดินทาง) */}
+            {Object.entries(dailyBudgets).map(([day, budget]) => (
+              <div key={day} className="flex justify-between items-center mb-4">
+                <span className="text-gray-800">
+                  ค่าใช้จ่ายวันที่ {day}: ฿{budget.toLocaleString()} (รวมค่าเดินทาง)
+                </span>
+                <Button
+                  type="text"
+                  danger
+                  onClick={() => handleRemoveDailyBudget(day)}
+                >
+                  <FaTrash className="text-lg" />
+                </Button>
+              </div>
+            ))}
+
+            {/* แสดงผลรวมค่าใช้จ่ายทั้งหมด (รวมค่าเดินทาง) */}
+            {Object.keys(dailyBudgets).length > 0 && (
               <div className="mt-6 border-t pt-4">
                 <h3 className="text-lg font-bold">{t("total_budget")}</h3>
                 <p className="text-xl text-purple-600">
-                  ฿{calculateTotalBudget().toLocaleString()}
+                  ฿{calculateTotalDailyBudgets().toLocaleString()} (รวมค่าเดินทาง)
                 </p>
               </div>
             )}

@@ -38,9 +38,9 @@ const Profile = () => {
           throw new Error("Failed to fetch plans data");
         }
         const data = await response.json();
-        setPlans(data.plan || []); // ตั้งค่า plans เป็นอาร์เรย์ว่างหากไม่มีข้อมูล
-        if (data.plan && data.plan.length > 0) {
-          setSelectedPlan(data.plan[0]);
+        setPlans(data.plans || []); // ตั้งค่า plans เป็นอาร์เรย์ว่างหากไม่มีข้อมูล
+        if (data.plans && data.plans.length > 0) {
+          setSelectedPlan(data.plans[0]);
         }
       } catch (err) {
         setError(err.message);
@@ -142,39 +142,48 @@ const Profile = () => {
                 {selectedPlan.budget ? `฿${selectedPlan.budget.toLocaleString()}` : "N/A"}
               </p>
               <p>
-                <strong>{t("days")} :</strong> {selectedPlan.day}
+                <strong>{t("days")} :</strong> {selectedPlan.startDate.substring(0, 10)} ถึง {" "}
+                {selectedPlan.endDate.substring(0, 10)}
               </p>
             </div>
 
-            <h4 className="text-lg font-semibold text-gray-700 mt-4 mb-2">
-              {t("locations")}
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {selectedPlan.plan_location.map((location) => (
-                <div
-                  key={location.id}
-                  className="bg-white p-4 rounded-lg shadow-md border border-gray-200"
-                >
-                  <h5 className="text-lg font-bold text-gray-800">
-                    {location.location.name}
-                  </h5>
-                  <p className="text-gray-600">
-                    <strong>{t("category")} :</strong> {location.location.category.name}
-                  </p>
-                  <p className="text-gray-600">
-                    <strong>{t("price")} :</strong> ฿{location.location.price.toLocaleString()}
-                  </p>
-                  <p className="text-gray-600">
-                    <strong>{t("description")} :</strong> {location.location.description}
-                  </p>
-                  <img
-                    src={location.location.locationImg[0].url}
-                    alt={location.location.name}
-                    className="w-full h-48 object-cover mt-2 rounded-lg shadow-md"
-                  />
+            {/* แสดงข้อมูลสถานที่ในแต่ละวัน */}
+            {selectedPlan.planDays.map((day) => (
+              <div key={day.id} className="mt-6">
+                <h4 className="text-lg font-semibold text-gray-700 mb-2">
+                  {t("day")} {day.day}
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {day.locations.map((location) => (
+                    <div
+                      key={location.id}
+                      className="bg-white p-4 rounded-lg shadow-md border border-gray-200"
+                    >
+                      <h5 className="text-lg font-bold text-gray-800">
+                        {location.location.name}
+                      </h5>
+                      <p className="text-gray-600">
+                        <strong>{t("category")} :</strong>{" "}
+                        {location.location.category.name}
+                      </p>
+                      <p className="text-gray-600">
+                        <strong>{t("price")} :</strong>{" "}
+                        ฿{location.location.price.toLocaleString()}
+                      </p>
+                      <p className="text-gray-600">
+                        <strong>{t("description")} :</strong>{" "}
+                        {location.location.description}
+                      </p>
+                      <img
+                        src={location.location.locationImg[0].url}
+                        alt={location.location.name}
+                        className="w-full h-48 object-cover mt-2 rounded-lg shadow-md"
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
