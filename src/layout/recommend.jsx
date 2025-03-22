@@ -202,10 +202,10 @@ const SeeMorePage = () => {
           <div className="relative inline-block ">
             <Button
               type="primary"
-              className="font-kanit"
+              className="font-kanit h-10"
               onClick={() => setIsMLOpen(true)}
             >
-              Open Recommendation
+              {t("recommendation")}
             </Button>
             <ML isOpen={isMLOpen} onClose={() => setIsMLOpen(false)} />
           </div>

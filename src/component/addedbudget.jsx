@@ -242,7 +242,7 @@ const AddedBudgetModal = ({ isOpen, onClose, travelCost }) => {
             {Object.entries(dailyBudgets).map(([day, budget]) => (
               <div key={day} className="flex justify-between items-center mb-4">
                 <span className="text-gray-800">
-                  ค่าใช้จ่ายวันที่ {day}: ฿{budget.toLocaleString()} (รวมค่าเดินทาง)
+                  ค่าใช้จ่ายวันที่ {day}: ฿{budget.toLocaleString()}
                 </span>
                 <Button
                   type="text"
@@ -259,7 +259,7 @@ const AddedBudgetModal = ({ isOpen, onClose, travelCost }) => {
               <div className="mt-6 border-t pt-4">
                 <h3 className="text-lg font-bold">{t("total_budget")}</h3>
                 <p className="text-xl text-purple-600">
-                  ฿{calculateTotalDailyBudgets().toLocaleString()} (รวมค่าเดินทาง)
+                  ฿{calculateTotalDailyBudgets().toLocaleString()}
                 </p>
               </div>
             )}

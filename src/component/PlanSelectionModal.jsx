@@ -103,6 +103,7 @@ const PlanSelectionModal = ({ isOpen, onClose, userId, onSelectPlan }) => {
       setPlans((prevPlans) =>
         prevPlans.filter((plan) => plan.planId !== planId)
       );
+      showToast(t("ลบแพลนสำเร็จ"));
     } catch (error) {
       console.error("Error deleting plan:", error);
       showToast(t("unknown_error"));

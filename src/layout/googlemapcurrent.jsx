@@ -365,7 +365,7 @@ const RouteInfo = ({ routes, locations, planId, onSaveTravelCost }) => {
       console.error("No planId provided.");
       return;
     }
-    showToast("บันทึกค่าใช้จ่ายน้ำมันสำเร็จ!");
+    showToast("บันทึกค่าเดินทางสำเร็จ!");
 
     // ส่งค่าเดินทางไปยัง parent component
     if (onSaveTravelCost) {
